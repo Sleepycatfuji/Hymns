@@ -1,0 +1,182 @@
+{
+  "100": {
+    "hymn_number": 100,
+    "hymn_title": "Kimer, I klokker! ja, kimer før dag i det dunkle",
+    "first_line": "Kimer, I klokker! ja, kimer før dag i det dunkle",
+    "melodies": [
+      "Henrik Rung 1857"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/100",
+    "chorales": [
+      {
+        "chorale_number": 302,
+        "chorale_title": "Kimer, I klokker! ja, kimer før dag i det dunkle"
+      }
+    ]
+  },
+  "101": {
+    "hymn_number": 101,
+    "hymn_title": "Himlens morgenrøde",
+    "first_line": "Himlens morgenrøde",
+    "melodies": [
+      "Kraften fra det høje"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/101",
+    "chorales": [
+      {
+        "chorale_number": 323,
+        "chorale_title": "Kraften fra det høje (Rung)"
+      },
+      {
+        "chorale_number": 324,
+        "chorale_title": "Kraften fra det høje (Berggreen)"
+      }
+    ]
+  },
+  "102": {
+    "hymn_number": 102,
+    "hymn_title": "Et lidet barn så lysteligt",
+    "first_line": "Et lidet barn så lysteligt",
+    "melodies": [
+      "15. årh. / Joseph Klug 1533",
+      "Carl Chr. Nic. Balle 1855"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/102",
+    "chorales": [
+      {
+        "chorale_number": 124,
+        "chorale_title": "Et lidet barn så lysteligt (Melodi fra 15. årh. / Klug)"
+      }
+    ]
+  },
+  "103": {
+    "hymn_number": 103,
+    "hymn_title": "Barn Jesus i en krybbe lå",
+    "first_line": "Barn Jesus i en krybbe lå",
+    "melodies": [
+      "Niels W. Gade 1859"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/103",
+    "chorales": [
+      {
+        "chorale_number": 23,
+        "chorale_title": "Barn Jesus i en krybbe lå"
+      }
+    ]
+  },
+  "104": {
+    "hymn_number": 104,
+    "hymn_title": "Et barn er født i Betlehem",
+    "first_line": "Et barn er født i Betlehem",
+    "melodies": [
+      "15. årh. / Lossius 1553",
+      "Tysk visemelodi omkring 1600 / A.P. Berggreen 1849"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/104",
+    "chorales": [
+      {
+        "chorale_number": 120,
+        "chorale_title": "Et barn er født i Betlehem (15. årh. / Lossius)"
+      },
+      {
+        "chorale_number": 121,
+        "chorale_title": "Et barn er født i Betlehem (Tysk / Berggreen)"
+      }
+    ]
+  },
+  "105": {
+    "hymn_number": 105,
+    "hymn_title": "Venner! sagde Guds engel blidt",
+    "first_line": "Venner! sagde Guds engel blidt",
+    "melodies": [
+      "Henrik Rung 1857"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/105",
+    "chorales": [
+      {
+        "chorale_number": 529,
+        "chorale_title": "Venner! sagde Guds engel blidt --- 6 a"
+      }
+    ]
+  },
+  "106": {
+    "hymn_number": 106,
+    "hymn_title": "Af højheden oprunden er",
+    "first_line": "Af højheden oprunden er",
+    "melodies": [
+      "Philipp Nicolai 1599"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/106",
+    "chorales": [
+      {
+        "chorale_number": 2,
+        "chorale_title": "Af højheden oprunden er (a + b)"
+      }
+    ]
+  },
+  "107": {
+    "hymn_number": 107,
+    "hymn_title": "Glæden hun er født i dag",
+    "first_line": "Glæden hun er født i dag",
+    "melodies": [
+      "15. årh. / Michael Weisse 1531"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/107",
+    "chorales": [
+      {
+        "chorale_number": 154,
+        "chorale_title": "Glæden hun er født i dag"
+      }
+    ]
+  },
+  "108": {
+    "hymn_number": 108,
+    "hymn_title": "Lovet være du, Jesus Krist",
+    "first_line": "Lovet være du, Jesus Krist",
+    "melodies": [
+      "Førreformatorisk leise / Johann Walter 1524",
+      "Lille Guds barn, hvad skader dig"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/108",
+    "chorales": [
+      {
+        "chorale_number": 339,
+        "chorale_title": "Lovet være du, Jesus Krist"
+      }
+    ]
+  },
+  "109": {
+    "hymn_number": 109,
+    "hymn_title": "I denne søde juletid",
+    "first_line": "I denne søde juletid",
+    "melodies": [
+      "Et lidet barn så lysteligt"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/109",
+    "chorales": [
+      {
+        "chorale_number": 124,
+        "chorale_title": "Et lidet barn så lysteligt (Melodi fra 15. årh. / Klug)"
+      },
+      {
+        "chorale_number": 125,
+        "chorale_title": "Et lidet barn så lysteligt (Balle)"
+      }
+    ]
+  },
+  "110": {
+    "hymn_number": 110,
+    "hymn_title": "Nu vil vi sjunge og være glad",
+    "first_line": "Nu vil vi sjunge og være glad",
+    "melodies": [
+      "Thomas Laub 1881"
+    ],
+    "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/110",
+    "chorales": [
+      {
+        "chorale_number": 402,
+        "chorale_title": "Nu vil vi sjunge og være glad"
+      }
+    ]
+  }
+}
