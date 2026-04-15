@@ -4,6 +4,22 @@ A simple web app that helps musicians quickly find the correct chorale(s) for hy
 
 ---
 
+## 🚀 Live Demo
+
+👉 https://hellokim.me/hymns/
+
+---
+
+## 💡 Project Background
+
+This project was inspired by a real-world need.
+
+My husband is an organist in Denmark, and during church services he receives hymn numbers from the pastor. However, the corresponding melodies are not directly shown in *Den Danske Salmebog*. He must manually look up the melodies in the chorale book (*Koralbog*), which can be time-consuming.
+
+To solve this, I built a small web application that connects hymn numbers and titles to their corresponding chorales, making it faster and easier to prepare for services.
+
+---
+
 ## 📖 Problem
 
 When preparing for church services, musicians receive hymn numbers from the pastor.
@@ -11,7 +27,7 @@ When preparing for church services, musicians receive hymn numbers from the past
 However:
 
 * The hymn book does **not directly show the melody**
-* The organist must manually search from the chorale book
+* The organist must manually search the chorale book (*Koralbog*)
 * This process is slow and frustrating
 
 ---
@@ -30,11 +46,12 @@ This app allows users to:
 
 ## 🚀 Features
 
-* Exact hymn number search (e.g. `10` only returns hymn 10 from the Choral Book)
-* Text search by title or first line
+* Exact hymn number search (e.g. `10` only returns hymn 10)
+* Text search by hymn nuber or first line
+* Number of verses in each hymn
 * Multiple chorale matches per hymn
-* Preferred melody selection with clear button
-* Comment/notes for each hymn
+* Preferred melody selection 
+* Personal comment section for each hymn
 * Danish 🇩🇰 <-> English 🇬🇧 language toggle
 * Fully client-side (no backend required)
 
@@ -49,18 +66,17 @@ This app allows users to:
 ---
 
 ## 📂 Project Structure
-
-```
 Hymns/
-├── index.html                  # Frontend app
-├── build_dataset.py            # Scrapes hymn data
-├── update_chorales.py          # Matches hymns → chorales
+├── index.html
+├── build_dataset.py
+├── update_chorales.py
 ├── data/
-│   ├── hymns_dataset.json
-│   ├── hymns_dataset_updated.json
-│   ├── match_audit_report.json
-│   └── reg_kds.pdf
-```
+│ ├── hymns_dataset.json
+│ ├── hymns_dataset_updated.json
+│ ├── match_audit_report.json
+│ └── reg_kds.pdf
+
+
 ---
 
 ## ⚙️ How to Run Locally
@@ -71,75 +87,30 @@ Hymns/
 python3 build_dataset.py
 python3 update_chorales.py
 ```
-
-### 2. Start local server
-
-```bash
+2. Start local server
+```
 python3 -m http.server 8000
 ```
-
-### 3. Open in browser
-
+4. Open in browser
 ```
 http://localhost:8000
 ```
 
----
+🌐 Deployment
 
-## 🌐 Deployment (GitHub Pages)
+This project is deployed via GitHub Pages:
 
-1. Push repository to GitHub
-2. Go to **Settings → Pages**
-3. Under **Source**, select:
+👉 https://hellokim.me/hymns/
 
-   * Branch: `main`
-   * Folder: `/ (root)`
-4. Save
+💾 Notes on Data Storage
+Preferences and comments are stored using browser localStorage
+Data is device-specific (not synced across devices)
 
-Your app will be available at:
+🙌 Acknowledgements
+* [Jonas Frederik](https://www.jonasfrederik.com/) for validating the hymn dataset 
+* [Den Danske Salmebog Online](https://www.dendanskesalmebogonline.dk/)
+* [Thor Callesen Koralbog](https://www.thor-callesen.com/koralbog/pdf/reg_kds.pdf)
 
-```
-https://your-username.github.io/repository-name/
-```
+👤 Author
+Kim Minamoto
 
----
-
-## 📱 Usage on Mobile (Android / iPhone)
-
-Open the app in a browser and add it to the home screen:
-
-### Android (Chrome)
-
-1. Open the link
-2. Tap the **⋮ menu (top right)**
-3. Tap **“Add to Home screen”**
-
-### iPhone (Safari)
-
-1. Open the link
-2. Tap the **Share button**
-3. Tap **“Add to Home Screen”**
-
-This makes the app behave like a simple mobile app.
-
----
-
-## 💾 Notes on Data Storage
-
-* Preferred melodies and comments are stored in the browser (`localStorage`)
-* Data is **device-specific** (not synced across devices)
-
----
-
-## 🙌 Acknowledgements
-
-* Jonas Frederik Nørager Langemark for checking the JSON database with actual Hymns
-* Den Danske Salmebog Online
-* Thor Callesen Koralbog
-
----
-
-## 👤 Author
-
-Kim M.
-Created to support real-world church preparation workflows.
