@@ -66,17 +66,18 @@ This app allows users to:
 ---
 
 ## 📂 Project Structure
+
+```text
 Hymns/
 ├── index.html
 ├── build_dataset.py
 ├── update_chorales.py
 ├── data/
-│ ├── hymns_dataset.json
-│ ├── hymns_dataset_updated.json
-│ ├── match_audit_report.json
-│ └── reg_kds.pdf
-
-
+│   ├── hymns_dataset.json
+│   ├── hymns_dataset_updated.json
+│   ├── match_audit_report.json
+│   └── reg_kds.pdf
+```
 ---
 
 ## ⚙️ How to Run Locally
