@@ -104,8 +104,8 @@ This project is deployed via GitHub Pages:
 👉 https://hellokim.me/hymns/
 
 💾 Notes on Data Storage
-Preferences and comments are stored using browser localStorage
-Data is device-specific (not synced across devices)
+* Preferences and comments are stored using browser localStorage
+* Data is device-specific (not synced across devices)
 
 🙌 Acknowledgements
 * [Jonas Frederik](https://www.jonasfrederik.com/) for validating the hymn dataset 
@@ -114,4 +114,14 @@ Data is device-specific (not synced across devices)
 
 👤 Author
 Kim Minamoto
+
+## 🤖 Use of AI
+
+Parts of this project were developed with the assistance of ChatGPT.
+
+AI was used to:
+- Help structure and refine code
+- Debug issues during development
+
+All logic, data processing, and final decisions were reviewed and implemented by me.
 
