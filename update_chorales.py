@@ -24,16 +24,6 @@ def clean_text(text: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
-# ---------------------------------
-# TEXT HELPERS
-# ---------------------------------
-def clean_text(text: str) -> str:
-    if not text:
-        return ""
-    text = text.replace("\xa0", " ")
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
 
 def strip_parenthetical(text: str) -> str:
     """
@@ -54,9 +44,13 @@ def normalize_text(text: str) -> str:
     text = "".join(c for c in text if not unicodedata.combining(c))
 
     text = text.replace("a.p.", "ap")
+    text = text.replace("a. p.", "ap")
     text = text.replace("c. e. f.", "cef")
     text = text.replace("j. p. e.", "jpe")
     text = text.replace("h. o. c.", "hoc")
+    text = text.replace("ö", "o")
+    text = text.replace("ä", "a")
+    text = text.replace("ü", "u")
 
     text = re.sub(r"[^a-z0-9æøå\s]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
@@ -93,10 +87,12 @@ def parse_chorale_pdf(pdf_path: Path) -> list[dict]:
                     key = (current_number, full_title)
                     if full_title and key not in seen:
                         seen.add(key)
-                        chorales.append({
-                            "chorale_number": current_number,
-                            "chorale_title": full_title
-                        })
+                        chorales.append(
+                            {
+                                "chorale_number": current_number,
+                                "chorale_title": full_title,
+                            }
+                        )
 
                 current_number = int(match.group(1))
                 current_title_parts = [match.group(2)]
@@ -112,10 +108,12 @@ def parse_chorale_pdf(pdf_path: Path) -> list[dict]:
             key = (current_number, full_title)
             if full_title and key not in seen:
                 seen.add(key)
-                chorales.append({
-                    "chorale_number": current_number,
-                    "chorale_title": full_title
-                })
+                chorales.append(
+                    {
+                        "chorale_number": current_number,
+                        "chorale_title": full_title,
+                    }
+                )
 
     with pdfplumber.open(pdf_path) as pdf:
         for page_num, page in enumerate(pdf.pages, start=1):
@@ -145,6 +143,24 @@ def parse_chorale_pdf(pdf_path: Path) -> list[dict]:
 # ---------------------------------
 # MATCHING HELPERS
 # ---------------------------------
+def deduplicate_chorales(chorales: list[dict]) -> list[dict]:
+    seen = set()
+    result = []
+
+    for chorale in chorales:
+        key = chorale["chorale_number"]
+        if key not in seen:
+            seen.add(key)
+            result.append(
+                {
+                    "chorale_number": chorale["chorale_number"],
+                    "chorale_title": chorale["chorale_title"],
+                }
+            )
+
+    return result
+
+
 def find_chorale_candidates(search_text: str, chorales: list[dict]) -> list[dict]:
     """
     Find chorale entries whose title starts with the given text.
@@ -163,6 +179,7 @@ def find_chorale_candidates(search_text: str, chorales: list[dict]) -> list[dict
 
     return matches
 
+
 def find_candidates_from_melody_titles(melodies: list[str], chorales: list[dict]) -> list[dict]:
     """
     Fallback:
@@ -175,7 +192,6 @@ def find_candidates_from_melody_titles(melodies: list[str], chorales: list[dict]
     for melody in melodies:
         melody = clean_text(melody)
 
-        # Skip empty or obviously non-title melody lines
         if not melody:
             continue
         if re.match(r"^\d+$", melody):
@@ -208,7 +224,6 @@ def melody_to_keywords(melody: str) -> list[str]:
         "grundtvig",
         "schumann",
         "klug",
-        "cruger",
         "cruger",
         "nielsen",
         "schop",
@@ -256,26 +271,114 @@ def filter_candidates_by_melody(candidates: list[dict], melodies: list[str]) -> 
     return filtered if filtered else candidates
 
 
-def deduplicate_chorales(chorales: list[dict]) -> list[dict]:
-    seen = set()
-    result = []
+def find_chorale_matches_by_title(query_title: str, chorales: list[dict]) -> list[dict]:
+    """
+    Find chorales by title using normalized exact / startswith / contains matching.
+    """
+    query_norm = normalize_text(query_title)
+    if not query_norm:
+        return []
+
+    exact_matches = []
+    startswith_matches = []
+    contains_matches = []
 
     for chorale in chorales:
-        key = chorale["chorale_number"]
-        if key not in seen:
-            seen.add(key)
-            result.append(chorale)
+        chorale_title = chorale.get("chorale_title", "")
+        chorale_norm = normalize_text(chorale_title)
 
-    return result
+        if chorale_norm == query_norm:
+            exact_matches.append(chorale)
+        elif chorale_norm.startswith(query_norm):
+            startswith_matches.append(chorale)
+        elif query_norm in chorale_norm:
+            contains_matches.append(chorale)
+
+    if exact_matches:
+        return exact_matches
+    if startswith_matches:
+        return startswith_matches
+    return contains_matches
 
 
+def resolve_manual_override_entries(entries: list, chorales: list[dict]) -> list[dict]:
+    """
+    Resolve a mixed override list into chorale dicts.
+    Entries may already be chorale dicts, or title strings.
+    """
+    resolved = []
+
+    for entry in entries:
+        if isinstance(entry, dict):
+            resolved.append(entry)
+        elif isinstance(entry, str):
+            resolved.extend(find_chorale_matches_by_title(entry, chorales))
+
+    return deduplicate_chorales(resolved)
+
+
+# ---------------------------------
+# MANUAL OVERRIDES
+# ---------------------------------
+MANUAL_CHORALE_OVERRIDES = {
+    "569": {
+        "replace": [
+            {
+                "chorale_number": 255,
+                "chorale_title": "Ja, engang mine øjne skal"
+            }
+        ]
+    },
+    "309": {
+        "append": [
+            {
+                "chorale_number": 33,
+                "chorale_title": "Bøj, o Helligånd, os alle"
+            }
+        ]
+    },
+    "240": {
+        "replace": [
+            {
+                "chorale_number": 83,
+                "chorale_title": "Dig være ære"
+            }
+        ]
+    },
+    "520": {
+        "replace": [
+            {
+                "chorale_number": 106,
+                "chorale_title": "Du, som vejen er og livet"
+            }
+        ]
+    },
+    "565": {
+        "replace_by_title": [
+            "Med sorgen og klagen hold måde"
+        ]
+    },
+    "750": {
+        "replace": [
+            {
+                "chorale_number": 400,
+                "chorale_title": "Nu titte til hinanden"
+            }
+        ]
+    },
+    "757": {
+        "replace_by_title": [
+            "Den lyse dag forgangen er"
+        ]
+    }
+}
 # ---------------------------------
 # MAIN UPDATE FUNCTION
 # ---------------------------------
-
 def update_hymn_dataset(hymns_dataset: dict, chorales: list[dict]) -> dict:
     updated = {}
 
+    # First pass: normal matching
     for hymn_id, hymn in hymns_dataset.items():
         hymn_title = clean_text(hymn.get("hymn_title", ""))
         first_line = clean_text(hymn.get("first_line", ""))
@@ -295,27 +398,51 @@ def update_hymn_dataset(hymns_dataset: dict, chorales: list[dict]) -> dict:
         final_matches = filter_candidates_by_melody(candidates, melodies)
         final_matches = deduplicate_chorales(final_matches)
 
-        # Fallback using melody titles
-        if not final_matches:
-            melody_title_matches = find_candidates_from_melody_titles(melodies, chorales)
-            if melody_title_matches:
-                final_matches = melody_title_matches
+        # Also add chorales that match melody titles
+        melody_title_matches = find_candidates_from_melody_titles(melodies, chorales)
+
+        if melody_title_matches:
+            final_matches = deduplicate_chorales(final_matches + melody_title_matches)
 
         updated_hymn = dict(hymn)
-        updated_hymn["chorales"] = [
-            {
-                "chorale_number": c["chorale_number"],
-                "chorale_title": c["chorale_title"]
-            }
-            for c in final_matches
-        ]
-
+        updated_hymn["chorales"] = deduplicate_chorales(final_matches)
         updated[hymn_id] = updated_hymn
 
-        if not final_matches:
-            print(f"NO MATCH -> hymn {hymn.get('hymn_number')}: {match_text}")
-            print(f"  melodies: {melodies}")
+    # Second pass: manual overrides
+    for hymn_id, override_config in MANUAL_CHORALE_OVERRIDES.items():
+        if hymn_id not in updated:
+            continue
 
+        if "replace" in override_config:
+            updated[hymn_id]["chorales"] = deduplicate_chorales(override_config["replace"])
+
+        if "append" in override_config:
+            existing = updated[hymn_id].get("chorales") or []
+            combined = existing + override_config["append"]
+            updated[hymn_id]["chorales"] = deduplicate_chorales(combined)
+
+        if "replace_by_title" in override_config:
+            resolved = resolve_manual_override_entries(override_config["replace_by_title"], chorales)
+            if resolved:
+                updated[hymn_id]["chorales"] = resolved
+
+        if "append_by_title" in override_config:
+            resolved = resolve_manual_override_entries(override_config["append_by_title"], chorales)
+            existing = updated[hymn_id].get("chorales") or []
+            updated[hymn_id]["chorales"] = deduplicate_chorales(existing + resolved)
+
+    # Final reporting
+    no_match_count = 0
+    for _, hymn in updated.items():
+        if not hymn.get("chorales"):
+            no_match_count += 1
+            print(
+                f"NO MATCH -> hymn {hymn.get('hymn_number')}: "
+                f"{hymn.get('first_line') or hymn.get('hymn_title')}"
+            )
+            print(f"  melodies: {hymn.get('melodies', [])}")
+
+    print(f"\nFinished. Hymns with no chorale match: {no_match_count}")
     return updated
 
 

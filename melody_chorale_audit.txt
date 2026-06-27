@@ -1,0 +1,277 @@
+
+HYMN 24 - En vej eller anden, vor Herre ved råd _OK
+melodies: 2
+  M: William Croft 1708
+  M: C.S. Harrington 1870
+chorales: 1
+  C: 119 En vej eller anden, vor Herre ved råd (Harrington)
+
+HYMN 44 - Urolige hjerte - OK
+melodies: 2
+  M: Viggo Kalhauge 1856
+  M: Knud Høgenhaven 1983
+chorales: 1
+  C: 519 Urolige hjerte (Kalhauge)
+
+HYMN 45 - Jeg går i fare, hvor jeg går - OK
+melodies: 2
+  M: Freylinghausen 1708
+  M: H.O.C. Zinck 1801
+chorales: 1
+  C: 261 Jeg går i fare, hvor jeg går (Freylinghausen)
+
+HYMN 46 - Sorrig og glæde de vandre til hobe - OK
+melodies: 2
+  M: Visemelodi omkring 1670
+  M: Thomas Laub 1916
+chorales: 1
+  C: 484 Sorrig og glæde de vandre til hobe (Laub)
+
+HYMN 52 - Du, Herre Krist - OK
+melodies: 3
+  M: Johann Rhau 1589
+  M: Mainz 1605
+  M: A.P. Berggreen 1852
+chorales: 1
+  C: 96 Du, Herre Krist (Berggreen)
+
+HYMN 57 - Herre, fordi du - OK
+melodies: 2
+  M: Ingmar Milveden 1970
+  M: Börge Ring 1975
+chorales: 1
+  C: 198 Herre, fordi du (B. Ring)
+
+HYMN 64 - Jeg vil mig Herren love
+melodies: 2
+  M: Nederlandsk psalter 1540
+  M: Christian Barnekow 1874
+chorales: 1
+  C: 280 Jeg vil mig Herren love (Barnekow)
+
+HYMN 76 - Op! thi dagen nu frembryder - OK
+melodies: 2
+  M: Niels W. Gade 1852
+  M: Thomas Laub 1917
+chorales: 1
+  C: 445 Op! thi dagen nu frembryder (Laub)
+
+HYMN 97 - Vor Jesus kan ej noget herberg finde - oK
+melodies: 3
+  M: Pontoppidan 1740
+  M: Thomas Laub 1915
+  M: Jeg kender ham, hvem jeg har overgivet
+chorales: 2
+  C: 551 Vor Jesus kan ej noget herberg finde (Laub)
+  C: 267 Jeg kender ham, hvem jeg har overgivet
+
+HYMN 102 - Et lidet barn så lysteligt - OK
+melodies: 2
+  M: 15. årh. / Joseph Klug 1533
+  M: Carl Chr. Nic. Balle 1855
+chorales: 1
+  C: 124 Et lidet barn så lysteligt (Melodi fra 15. årh. / Klug)
+
+HYMN 129 - Julebudet til dem, der bygge  - OK
+melodies: 2
+  M: J.P.E. Hartmann 1890
+  M: Thorvald Aagaard 1932
+chorales: 1
+  C: 296 Julebudet til dem, der bygge (Hartmann)
+
+HYMN 164 - Øjne, I var lykkelige - OK -- testing - save ok
+melodies: 3
+  M: Heinrich Nutzhorn 1866
+  M: Leif Kayser 1975
+  M: Herre, jeg har handlet ilde
+chorales: 2
+  C: 566 Øjne, I var lykkelige (Nutzhorn)
+  C: 204 Herre, jeg har handlet ilde
+
+HYMN 179 - Herren god, som uden grænser 
+melodies: 2
+  M: Bøj, o Helligånd, os alle
+  M: Herre, jeg har handlet ilde
+chorales: 1
+  C: 204 Herre, jeg har handlet ilde
+
+HYMN 192 - Hil dig, Frelser og Forsoner - OK
+melodies: 2
+  M: C.Chr. Hoffman 1878
+  M: Thomas Laub omkring 1890
+chorales: 1
+  C: 217 Hil dig, Frelser og Forsoner (Laub)
+
+HYMN 231 - Påske vi holde - ok 
+melodies: 2
+  M: Niels W. Gade 1861
+  M: Thomas Laub 1917
+chorales: 1
+  C: 457 Påske vi holde (Laub)
+
+HYMN 241 - Tag det sorte kors fra graven - OK
+melodies: 2
+  M: Henrik Rung 1847
+  M: Lasse Lunderskov 1983
+chorales: 1
+  C: 495 Tag det sorte kors fra graven (Rung)
+
+HYMN 272 - I lemmer, hvis hoved har Himlen i vælde - OK
+melodies: 3
+  M: Forsamlingsmelodi 19. årh.
+  M: Thomas Laub omkring 1885
+  M: Som lilliens hjerte kan holdes i grøde
+chorales: 2
+  C: 252 I lemmer, hvis hoved har Himlen i vælde (Laub)
+  C: 477 Som lilliens hjerte kan holdes i grøde
+
+HYMN 293 - Gud Helligånd, vor trøstermand - OK
+melodies: 3
+  M: Dansk 1612
+  M: J.P.E. Hartmann 1890
+  M: O store Gud, din kærlighed
+chorales: 2
+  C: 165 Gud Helligånd, vor trøstermand (Hartmann)
+  C: 449 O store Gud, din kærlighed
+
+HYMN 316 - Helligånd, hør, hvad vi bede
+melodies: 2
+  M: Bøj, o Helligånd, os alle.
+  M: Herre, jeg har handlet ilde
+chorales: 1
+  C: 204 Herre, jeg har handlet ilde
+
+HYMN 349 - Herren han har besøgt sit folk
+melodies: 2
+  M: Carl Chr. Nic. Balle? 1850
+  M: Thomas Laub 1900
+chorales: 1
+  C: 208 Herren han har besøgt sit folk (Laub)
+
+HYMN 397 - Trods længselens smerte
+melodies: 2
+  M: Hans Matthison-Hansen 1860
+  M: Oluf Ring 1936
+chorales: 1
+  C: 506 Trods længselens smerte (Ring)
+
+HYMN 411 - Hyggelig, rolig
+melodies: 2
+  M: L.M. Lindeman 1840
+  M: J.A. Gether 1860. Otto Mortensen 1982
+chorales: 1
+  C: 229 Hyggelig, rolig (Lindeman)
+
+HYMN 443 - Op til Guds hus vi gå
+melodies: 2
+  M: Christian Barnekow 1857
+  M: Knud Jeppesen 1951
+chorales: 1
+  C: 446 Op til Guds hus vi gå (Barnekow)
+
+HYMN 492 - Guds igenfødte, ny-levende sjæle
+melodies: 2
+  M: Ansbach 1664
+  M: Freylinghausen 1704
+chorales: 1
+  C: 171 Guds igenfødte, ny-levende sjæle (Freylinghausen)
+
+HYMN 516 - Klynke og klage
+melodies: 2
+  M: Efter Johann Crüger 1653
+  M: Carsten Friis Viborg 1878
+chorales: 1
+  C: 308 Klynke og klage (Crüger)
+
+HYMN 558 - Når mit øje, træt af møje
+melodies: 2
+  M: Meiningen 1693
+  M: Thomas Laub 1915
+chorales: 1
+  C: 411 Når mit øje, træt af møje (Laub)
+
+HYMN 561 - Jeg kender et land
+melodies: 2
+  M: Thomas Laub 1907
+  M: Otto Mortensen 1982. O kristelighed
+chorales: 1
+  C: 265 Jeg kender et land (Laub)
+
+HYMN 567 - Jeg er fremmed, jeg er en pilgrim
+melodies: 2
+  M: Svensk 1859
+  M: Bernhard Christensen 1951
+chorales: 1
+  C: 256 Jeg er fremmed, jeg er en pilgrim (Svensk)
+
+HYMN 571 - Den store hvide flok vi se - OK
+melodies: 3
+  M: Sperontes 1736
+  M: Johan H. Nebelong 1881
+  M: Thomas Laub omkring 1908
+chorales: 1
+  C: 53 Den store hvide flok vi se (Laub)
+
+HYMN 612 - Den store mester kommer
+melodies: 3
+  M: J.P.E. Hartmann 1873
+  M: Caspar Chr. Hoffman 1878
+  M: Rued Langgaard 1924
+chorales: 1
+  C: 54 Den store mester kommer (Hartmann)
+
+HYMN 622 - Halleluja! jeg har min Jesus fundet
+melodies: 2
+  M: Eja, min sjæl ret inderlig sig fryder
+  M: Nu rinder solen op (Nederlandsk visemelodi)
+chorales: 1
+  C: 392 Nu rinder solen op (Nederlandsk visemelodi)
+
+HYMN 625 - Op, I kristne, ruster eder
+melodies: 2
+  M: Joachim Neander 1680
+  M: Tysk visemelodi omkring 1800
+chorales: 1
+  C: 441 Op, I kristne, ruster eder (Tysk visemelodi)
+
+HYMN 632 - Stå fast, min sjæl, stå fast
+melodies: 2
+  M: Eja, min sjæl ret inderlig sig fryder
+  M: Nu rinder solen op (Nederlandsk visemelodi)
+chorales: 1
+  C: 392 Nu rinder solen op (Nederlandsk visemelodi)
+
+HYMN 633 - Har hånd du lagt på Herrens plov
+melodies: 2
+  M: Johann Schop 1641
+  M: Joseph Glæser 1880
+chorales: 1
+  C: 189 Har hånd du lagt på Herrens plov (Schop)
+
+HYMN 644 - Aldrig er jeg uden våde
+melodies: 2
+  M: Johann Horn 1544
+  M: A.P. Berggreen 1852
+chorales: 1
+  C: 8 Aldrig er jeg uden våde (Berggreen)
+
+HYMN 658 - Når jeg er træt og trist, når modet svigter
+melodies: 2
+  M: Lasse Lunderskov 1975.
+  M: Nu rinder solen op af østerlide
+chorales: 1
+  C: 409 Når jeg er træt og trist, når modet svigter
+
+HYMN 669 - Det koster ej for megen strid
+melodies: 2
+  M: Freylinghausen 1704
+  M: Forsamlingsmelodi 1893
+chorales: 1
+  C: 73 Det koster ej for megen strid (Freylinghausen)
+
+HYMN 778 - Fred hviler over land og by
+melodies: 2
+  M: Rudolph Bay 1827
+  M: Thomas Laub 1922
+chorales: 1
+  C: 138 Fred hviler over land og by (Laub)
