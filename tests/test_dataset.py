@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 from pathlib import Path
 import unittest
@@ -96,6 +97,29 @@ class DatasetTests(unittest.TestCase):
         self.assertEqual(self.dataset['5']['verse_count'], 7)
         self.assertEqual(self.codes(5), ['424', '563'])
 
+    def test_hymn_six_secondary_melody_and_verses(self):
+        self.assertEqual(self.codes(6), ['424', '563'])
+        self.assertEqual(self.dataset['6']['verse_count'], 3)
+
+    def test_book_pages_remain_separate_from_chorales(self):
+        for n, page, label, codes, verses in [(438, 568, 'Nadver C', [], 1),
+                                             (440, 570, 'Agnus Dei', ['416'], 3)]:
+            hymn = self.dataset[str(n)]
+            self.assertEqual(self.codes(n), codes)
+            self.assertEqual(hymn['book_page'], page)
+            self.assertEqual(hymn['book_page_label'], label)
+            self.assertEqual(hymn['verse_count'], verses)
+            self.assertEqual(self.audit['by_hymn'][str(n)]['book_reference']['page_number'], page)
+        # Chorale 568 is still a valid, unrelated melody, never renamed to Nadver C.
+        self.assertEqual(self.register['568']['chorale_title'], 'Ånden opgav enkesønnen')
+
+    def test_display_revision_preserves_all_791_mappings_and_counts(self):
+        # Freeze the evidence-reviewed projection at PR commit a768b72.
+        projection = {i: [h['verse_count'], [c['chorale_number'] for c in h['chorales']]]
+                      for i, h in self.dataset.items()}
+        actual = hashlib.sha256(json.dumps(projection, sort_keys=True).encode()).hexdigest()
+        self.assertEqual(actual, '8a64c077d127862291b80b910ba7dfccc5d47ed50fece8f2b54f4192712aa73b')
+
     def test_secondary_melody_missing_from_both_title_match_and_pdf(self):
         self.assertEqual(self.codes(735), ['396', '364', '109'])
 
@@ -154,6 +178,11 @@ class DatasetTests(unittest.TestCase):
         self.assertEqual(by_code['125']['recording_melody'], 'Carl C. N. Balle 1855')
 
     def test_validation_rejects_partial_data_and_wrong_recordings(self):
+        for page, label in [(True, 'Nadver C'), (0, 'Nadver C'), (568, '')]:
+            bad = copy.deepcopy(self.dataset)
+            bad['438']['book_page'], bad['438']['book_page_label'] = page, label
+            with self.assertRaises(ValueError):
+                mapping.validate_dataset(bad, self.register, self.references)
         bad = copy.deepcopy(self.dataset)
         del bad['791']
         with self.assertRaises(ValueError):

@@ -19,7 +19,8 @@
     "url": "https://m.dendanskesalmebogonline.dk/salme/438",
     "special_reference": "Nadver C — Sanctus (Hellig, hellig, hellig er Herren)",
     "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf",
-    "book_page": 568
+    "book_page": 568,
+    "book_page_label": "Nadver C"
   },
   "440": {
     "kds_codes": [
@@ -29,6 +30,7 @@
     "url": "https://m.dendanskesalmebogonline.dk/salme/440",
     "special_reference": "Agnus Dei — højmesseordningen (O Guds Lam uskyldig)",
     "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf",
-    "book_page": 570
+    "book_page": 570,
+    "book_page_label": "Agnus Dei"
   }
 }

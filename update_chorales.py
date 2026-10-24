@@ -201,10 +201,15 @@ def update_hymn_dataset(hymns, register, references):
             updated['special_reference'] = special
         if correction and correction.get('book_page'):
             updated['book_page'] = correction['book_page']
+            updated['book_page_label'] = correction['book_page_label']
         result[hymn_id] = updated
         by_hymn[hymn_id] = {
             'website_kds_codes': web_codes, 'reference_kds_codes': ref_codes,
             'resolved_kds_codes': codes, 'mapping_sources': sources,
+            'book_reference': ({'page_number': updated['book_page'],
+                                'label': updated['book_page_label'], 'volume': 'I',
+                                'source': correction['evidence_url']}
+                               if updated.get('book_page') else None),
             'website_verse_count': hymn['verse_count'], 'reference_verse_count': reference['verse_count'],
             'resolved_verse_count': count, 'verse_count_source': count_source,
             'reviewed_correction': correction,
@@ -232,9 +237,14 @@ def validate_dataset(dataset, register, references):
             raise ValueError(f'{key}: invalid identity')
         if type(hymn['verse_count']) is not int or hymn['verse_count'] <= 0:
             raise ValueError(f'{key}: invalid verse count')
+        if 'book_page' in hymn:
+            if type(hymn['book_page']) is not int or hymn['book_page'] <= 0 or not isinstance(hymn.get('book_page_label'), str) or not hymn['book_page_label'].strip():
+                raise ValueError(f'{key}: invalid book-page reference')
+        elif hymn.get('book_page_label'):
+            raise ValueError(f'{key}: book label without a page number')
         options = hymn['chorale_options']
         codes = [o['display_kds'] for o in options]
-        if (not codes and not hymn.get('special_reference')) or len(codes) != len(set(codes)):
+        if (not codes and not hymn.get('book_page')) or len(codes) != len(set(codes)):
             raise ValueError(f'{key}: missing/duplicate chorales')
         for o in options:
             code = o['display_kds']

@@ -85,6 +85,8 @@ Hymns/
 ├── build_dataset.py                  # Structured website metadata scraper
 ├── update_chorales.py                # Supported, validated mapping builder
 ├── update_chorales_v4.py             # Compatibility entry point to the same builder
+├── build_release.py                  # Package frontend + exact hashed dataset
+├── verify_release.py                 # Verify local/live files against a commit
 ├── tests/                            # Offline HTML, PDF, dataset and frontend tests
 ├── docs/dataset-audit.md              # Findings and source-resolution policy
 └── data/
@@ -144,21 +146,17 @@ http://localhost:8000
 
 ---
 
-## 🌐 Deployment (GitHub Pages)
+## 🌐 Release packaging and deployment
 
-1. Push repository to GitHub
-2. Go to **Settings → Pages**
-3. Under **Source**, select:
+Do not merge or deploy this PR without approval. CI only validates and uploads a
+release artifact; it has no deployment step or deployment permissions.
 
-   * Branch: `main`
-   * Folder: `/ (root)`
-4. Save
-
-Your app will be available at:
-
-```
-https://your-username.github.io/repository-name/
-```
+After approval, deploy the **whole release bundle** built from the merged commit,
+not separate copies of `index.html` and JSON. The bundle pins the frontend to a
+content-hashed dataset and verifies its digest before displaying any hymns.
+See [deployment and live verification](docs/deployment.md) for the approval-gated
+procedure and the read-only command that checks all live files against the
+merged repository commit.
 
 ---
 

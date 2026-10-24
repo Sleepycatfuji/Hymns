@@ -25144,7 +25144,8 @@
     "chorales": [],
     "chorale_options": [],
     "special_reference": "Nadver C — Sanctus (Hellig, hellig, hellig er Herren)",
-    "book_page": 568
+    "book_page": 568,
+    "book_page_label": "Nadver C"
   },
   "439": {
     "hymn_number": 439,
@@ -25236,7 +25237,8 @@
       }
     ],
     "special_reference": "Agnus Dei — højmesseordningen (O Guds Lam uskyldig)",
-    "book_page": 570
+    "book_page": 570,
+    "book_page_label": "Agnus Dei"
   },
   "441": {
     "hymn_number": 441,

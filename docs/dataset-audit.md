@@ -83,7 +83,7 @@ live website. No claim is made about which deployment mechanism caused the drift
 | 380 | 439 | 439, 311, 63 | 439, 311 | Resolve merged PDF cell against source rows/URL |
 | 432 | 201, 202 | 201, 202 | 202 | Litany; explicit URL and register qualifier |
 | 433 | 201 | 201, 202 | 201 | Kyrie; explicit URL and register qualifier |
-| 438 | 568 | 568 | Book page 568 / Nadver C | Preserve numeric navigation, distinguish page from chorale 568 |
+| 438 | 568 | 568 | Book page 568 — Nadver C | Preserve numeric navigation, distinguish page from chorale 568 |
 | 440 | 570 | 570, 416 | Book page 570 plus chorale 416 | Preserve both explicit references, without guessing recording association |
 | 597 | 493 | 493, 63, 423 | 493, 63 | Both explicit sources identify 493 and 63; 423 was inferred from an alias |
 | 735 | 396 | 396, 364 | 396, 364, 109 | Explicit secondary recording URL |
@@ -132,3 +132,31 @@ This audit establishes consistency against the provided register/reference and
 the current website. It does not claim to identify additional performance
 alternatives absent from those sources. Printed alternatives without recordings
 remain available without guessed composer labels.
+
+## Numeric display revision
+
+This revision changes presentation and reference structure only. A regression
+fingerprint of every hymn's verse count and ordered chorale codes at commit
+`a768b72` prevents accidental changes to any of the 791 mappings or verse counts.
+
+- Actual melody references remain in `chorales[].chorale_number` and
+  `chorale_options[].kds_codes`, with stable `kds:<code>` preference IDs.
+- Page references use a separate integer `book_page` and text `book_page_label`.
+  They are never inserted into `chorales` or made into selectable chorale IDs.
+- Hymn 438 has no chorale 568 choice. It shows **Book page 568 — Nadver C**.
+- Hymn 440 shows **Chorale book no. 416**, then **Book page 570 — Agnus Dei**.
+- Danish displays use **Bogside 568 — Nadver C** and **Bogside 570 — Agnus Dei**.
+- Hymns 5 and 6 both offer 424 and 563, with seven and three verses respectively.
+  Composer information and preferred-chorale selection are preserved.
+- No individual score PDF links are required or generated. The existing reference
+  PDFs provide mapping evidence, not individual sheet music.
+
+The generated audit has a separate `book_reference` object (page number, label,
+volume and evidence source) for 438 and 440. Regression tests assert the exact
+reference types, labels, choices and verse counts for 5, 6, 438 and 440 in addition
+to all-dataset validation. Frontend tests reject page references masquerading as
+chorale choices and verify saved preferences and composer information.
+
+The [release procedure](deployment.md) packages the frontend and dataset together,
+checks their content hashes, and documents how to compare the live deployment
+with a specific merged commit. CI builds the artifact but does not deploy it.
