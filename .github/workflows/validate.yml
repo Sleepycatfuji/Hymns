@@ -1,6 +1,7 @@
-name: Validate hymn dataset
+name: Validate and publish hymns
 on:
   pull_request:
+  workflow_dispatch:
   push:
     branches: [main]
 permissions:
@@ -28,3 +29,90 @@ jobs:
           name: hymns-release-${{ github.sha }}
           path: release/
           include-hidden-files: true
+
+  publish:
+    name: Publish to hellokim.me/hymns
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: hymns-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip superseded commits
+        id: current
+        shell: bash
+        run: |
+          latest=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'publish=false' >> "$GITHUB_OUTPUT"
+            echo 'A newer main commit will publish instead.'
+          fi
+      - uses: actions/download-artifact@v4
+        if: steps.current.outputs.publish == 'true'
+        with:
+          name: hymns-release-${{ github.sha }}
+          path: release/
+      - uses: actions/setup-python@v5
+        if: steps.current.outputs.publish == 'true'
+        with:
+          python-version: '3.12'
+          cache: pip
+      - if: steps.current.outputs.publish == 'true'
+        run: python -m pip install -r requirements.txt
+      - name: Verify release before publishing
+        if: steps.current.outputs.publish == 'true'
+        run: python verify_release.py --directory release
+      - name: Check out portfolio publishing repository
+        if: steps.current.outputs.publish == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Sleepycatfuji/skills-github-pages
+          ref: main
+          path: portfolio
+          ssh-key: ${{ secrets.PORTFOLIO_DEPLOY_KEY }}
+      - name: Publish only the hymns folder
+        if: steps.current.outputs.publish == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C portfolio config user.name 'Hymns publisher'
+          git -C portfolio config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            python publish_release.py --release release --checkout portfolio
+            git -C portfolio add -- hymns
+            if git -C portfolio diff --cached --quiet; then
+              echo 'This release is already published.'
+              break
+            fi
+            if git -C portfolio diff --cached --name-only | grep -qv '^hymns/'; then
+              echo 'Refusing to publish changes outside hymns/' >&2
+              exit 1
+            fi
+            git -C portfolio commit -m "Publish Hymns $GITHUB_SHA"
+            if git -C portfolio push origin HEAD:main; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            # This is an ephemeral CI checkout; retry against current portfolio
+            # main rather than forcing over unrelated portfolio changes.
+            git -C portfolio fetch origin main
+            git -C portfolio reset --hard origin/main
+          done
+      - name: Verify the live site after GitHub Pages finishes
+        if: steps.current.outputs.publish == 'true'
+        shell: bash
+        run: |
+          for attempt in $(seq 1 30); do
+            if python verify_release.py --url https://hellokim.me/hymns/; then
+              echo "Published $GITHUB_SHA to https://hellokim.me/hymns/" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 20
+          done
+          echo 'Live site did not match the release before the timeout.' >&2
+          exit 1

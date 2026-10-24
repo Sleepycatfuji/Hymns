@@ -148,15 +148,16 @@ http://localhost:8000
 
 ## 🌐 Release packaging and deployment
 
-Do not merge or deploy this PR without approval. CI only validates and uploads a
-release artifact; it has no deployment step or deployment permissions.
+Updates pushed or merged to `Hymns/main` now run tests, build one complete release,
+and publish it to **https://hellokim.me/hymns/** automatically. Pull requests run
+validation only. If validation fails, the live release is left in place.
 
-After approval, deploy the **whole release bundle** built from the merged commit,
-not separate copies of `index.html` and JSON. The bundle pins the frontend to a
-content-hashed dataset and verifies its digest before displaying any hymns.
-See [deployment and live verification](docs/deployment.md) for the approval-gated
-procedure and the read-only command that checks all live files against the
-merged repository commit.
+The production folder is hosted by `Sleepycatfuji/skills-github-pages`, not this
+repository's own `/Hymns/` Pages site. The publisher updates only that portfolio
+repository's `hymns/` folder, preserving the homepage and domain configuration.
+A post-publish check waits for GitHub Pages and compares the actual live files
+with the source commit. See [deployment and live verification](docs/deployment.md)
+for status, manual retries, credentials, and how to disable publishing.
 
 ---
 

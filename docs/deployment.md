@@ -1,68 +1,85 @@
-# Deploy and verify a matching frontend and dataset
+# Automatic publishing to hellokim.me/hymns
 
-**Approval is required before merging or deploying PR #1.** This PR only prepares
-and tests the release bundle. No hosting configuration or production files are
-changed by the build, verifier, tests or CI workflow.
+Every push or merge to `Sleepycatfuji/Hymns/main` runs the **Validate and publish
+hymns** workflow. Pull requests run validation and build review artifacts only;
+they never receive the production publishing key. Automatic production publishing
+was enabled at the owner's request after PR #1 was merged.
 
-## Build one release
+## Production route
 
-After approval to merge, use a clean checkout of the exact merged commit (not the
-PR's temporary merge ref). Install `requirements.txt`, then run:
+`Hymns/main` → validation → complete release artifact →
+`skills-github-pages/main:hymns/` → GitHub Pages → `https://hellokim.me/hymns/`.
+
+The custom domain belongs to `Sleepycatfuji/skills-github-pages`, whose Pages source
+is `main` at the repository root. `Hymns` has its own different Pages URL at
+`https://sleepycatfuji.github.io/Hymns/`; that is not the user-facing destination.
+The publisher does not change the portfolio homepage, CNAME, theme, other pages,
+or Pages settings. Its git commit is restricted to the `hymns/` folder.
+
+## What happens on an update
+
+1. All Python tests, all 791 frontend rendering checks, and deterministic dataset
+   validation must pass. Commit regenerated data/audit when changing source data:
+   run `python update_chorales.py` locally first. Mapping/verse changes require
+   source evidence and updated regression expectations, not bypassing tests.
+2. CI builds `hymns-release-<commit>` containing frontend, hashed JSON dataset,
+   manifest and a hosting control marker. The frontend verifies its dataset hash.
+3. The publish job verifies that artifact and skips superseded source commits.
+4. It checks out `skills-github-pages/main` and syncs only `hymns/`. Old immutable
+   datasets remain for already-open pages; the obsolete mutable dataset is removed.
+   Publication uses a normal fast-forward push and retries against newer portfolio
+   commits rather than overwriting them. Production jobs are serialized.
+5. The portfolio's existing GitHub Pages build publishes the commit. The source
+   workflow retries read-only live verification for up to ten minutes and succeeds
+   only when the public HTML, dataset and manifest match the source commit.
+
+No one needs to copy files or update the portfolio's hymns folder by hand.
+Only updates reaching `main` deploy; unfinished work on other branches does not.
+
+## Status and retries
+
+Open [Hymns Actions](https://github.com/Sleepycatfuji/Hymns/actions) and select
+**Validate and publish hymns**. A successful publish job includes the live URL and
+source commit in its summary. If tests fail, nothing is published. If a sync or
+live verification fails, inspect the failed step and the portfolio's Pages run.
+The verification failure does not mean the published content was rolled back.
+
+Use **Run workflow → main** to retry the latest validated source. Re-running an
+old superseded commit skips publishing it. To roll back content, revert the source
+change on `Hymns/main`; the normal pipeline validates and publishes the revert.
+To pause publishing, disable this workflow in Actions (which also pauses its
+validation), or remove/disable the `publish` job while keeping validation.
+
+## Publishing credential
+
+The portfolio has a dedicated write-enabled deploy key named
+`Hymns automatic publishing`. Its private key is stored only as the encrypted
+`PORTFOLIO_DEPLOY_KEY` Actions secret in `Sleepycatfuji/Hymns`. It grants repository
+access to the portfolio, not account-wide access; the workflow confines its
+changes to `hymns/`. It is not available to the pull-request validation job.
+Revoke the key in the portfolio's **Settings → Deploy keys**, and remove the source
+secret to disable this credential. Rotate both together if replacing it.
+
+## Build a local preview
+
+From a clean checkout with `requirements.txt` installed:
 
 ```sh
-python -m unittest discover -s tests -v
-python update_chorales.py --check
-node tests/test_frontend.cjs
 python build_release.py --output release
 python verify_release.py --directory release
 ```
 
-`release` must be a new directory. Use a different output name if it already
-exists. The build fails on tracked uncommitted changes or stale generated data.
-CI performs these steps and uploads `hymns-release-<commit>` as an Actions
-artifact. The artifact for the successful **main-branch run after merging** is
-eligible for deployment; the PR-run artifact is a review preview only.
-
-The bundle contains only:
-
-- `index.html`, with an exact dataset filename and SHA-256 embedded;
-- `data/hymns.<sha256>.json`, containing all 791 hymns;
-- `release.json`, recording the commit and hashes of all public files;
-- `.nojekyll`, for compatible static hosting.
-
-The source checkout continues to load `data/hymns_dataset_updated.json` for local
-development. The production bundle uses the hashed filename. Do not manually edit
-the bundle or replace its JSON after building it. The frontend verifies the
-payload digest before parsing/displaying it and shows a load error if it does
-not match. Production must use HTTPS (localhost HTTP also supports previews).
-
-## Publish only after deployment approval
-
-1. Confirm the approved merged commit and successful validation run.
-2. Stage the **entire bundle** at the host serving `https://hellokim.me/hymns/`.
-   Use that host's atomic release/directory switch so frontend, data and manifest
-   become available together. Retain the previous release for rollback.
-3. Serve `index.html` and `release.json` with revalidation/no-cache. The hashed
-   JSON can be cached as immutable. Purge old HTML/manifest caches if the host
-   uses a CDN. Retaining previously hashed data files during rollout also allows
-   already-open older pages to continue functioning.
-4. Do not copy just the JSON, just the HTML, or the repository root into the
-   production folder. A branch-root Pages deployment bypasses the bundle and its
-   runtime integrity check. Configure the host to publish the approved artifact
-   through its normal approval process instead.
-5. Keep deployment disabled on pull-request events. The included CI workflow
-   deliberately has no deployment action and only `contents: read` permission.
-
-The repository does not establish how the custom-domain `/hymns/` folder is
-published. The live HTML and data previously differed from repository main.
-Confirm that hosting destination before publishing; a GitHub Pages deployment
-to a different URL is not proof that hellokim.me was updated. No automatic
-hosting changes are made here.
+Use a new output directory if `release` already exists. The bundle contains
+`index.html`, `data/hymns.<sha256>.json`, `release.json` (commit and hashes), and
+`.nojekyll`. The existing portfolio still uses Jekyll; the marker inside `hymns/`
+does not disable its site-wide theme. Live verification checks all runtime files
+and the manifest, but does not require the host to serve that control dotfile.
+No individual score PDF links are generated.
 
 ## Verify the actual live site
 
-From the clean checkout of the approved merged commit, run this read-only check
-**after** deployment:
+From a clean checkout of the main commit being published, run this read-only check
+after the workflow completes:
 
 ```sh
 python verify_release.py --url https://hellokim.me/hymns/

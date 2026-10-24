@@ -30,6 +30,13 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             verify_files(files.__getitem__, 'another-commit')
 
+    def test_live_verification_does_not_require_host_control_dotfile(self):
+        files = release_files('test-revision')
+        del files['.nojekyll']
+        verify_files(files.__getitem__, 'test-revision', check_host_markers=False)
+        with self.assertRaises(KeyError):
+            verify_files(files.__getitem__, 'test-revision')
+
     def test_release_directory_must_be_new(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / 'release'

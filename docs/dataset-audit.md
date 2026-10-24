@@ -159,4 +159,4 @@ chorale choices and verify saved preferences and composer information.
 
 The [release procedure](deployment.md) packages the frontend and dataset together,
 checks their content hashes, and documents how to compare the live deployment
-with a specific merged commit. CI builds the artifact but does not deploy it.
+with a specific merged commit. Following the owner’s request after PR #1 was merged, CI now publishes successful main-branch releases to the portfolio’s `hymns/` folder and verifies the live site. Pull requests still do not deploy.

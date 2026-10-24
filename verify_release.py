@@ -7,10 +7,13 @@ from urllib.request import Request, urlopen
 from build_release import current_revision, release_files, require_clean_checkout
 
 
-def verify_files(read, revision):
+def verify_files(read, revision, check_host_markers=True):
     expected = release_files(revision)
     # Compare every byte, including the revision and manifest, against this checkout.
     for name, content in expected.items():
+        # Jekyll hosts need not serve deployment control dotfiles.
+        if name == '.nojekyll' and not check_host_markers:
+            continue
         if read(name) != content:
             raise ValueError(f'Release mismatch: {name}')
     return json.loads(expected['release.json'])
@@ -34,7 +37,7 @@ def main():
                               headers={'Cache-Control': 'no-cache'})
             with urlopen(request, timeout=30) as response:
                 return response.read()
-    manifest = verify_files(read, revision)
+    manifest = verify_files(read, revision, check_host_markers=bool(args.directory))
     print(f"Verified frontend and all {manifest['hymn_count']} hymns against commit {revision}.")
 
 
