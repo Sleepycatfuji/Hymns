@@ -41,8 +41,10 @@ Hymn 5 is now an explicit regression test of both data generation and rendering.
   page 570, and another liturgical page 571 in the same style as chorale entries.
   The old parser kept the first 568, mislabelling the actual chorale 568
   (*Ånden opgav enkesønnen*). Exclude the three page references from the numbered
-  register. Show service-order references for hymns 438 and 440 instead of fake
-  chorale options. The [editorial preface](https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf)
+  register. Keep the useful numbers visible as **Koralbog, bind I, side 568**
+  for hymn 438 and **side 570** for hymn 440. Hymn 440 also retains the
+  melody-reference PDF’s explicit chorale 416 alternative, without attributing
+  the website’s nonnumeric recording to it. The [editorial preface](https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf)
   explicitly describes the Sanctus and Agnus Dei references as page numbers in
   Bind I, 2. del (Højmesseordning).
 
@@ -53,7 +55,7 @@ Preserve their union, including printed alternatives without recordings, unless
 an explicit reviewed correction applies. An equal title alone is insufficient:
 the register contains aliases for multiple tunes and distinct liturgical forms.
 Each option records its source. `data/reference_corrections.json` records the
-reviewed liturgical distinctions and hymn 790 correction with reasons and URLs.
+reviewed liturgical distinctions with reasons and URLs.
 The generated audit lists the source and resolved values for every hymn.
 
 Numbered website verse rows take precedence over PDF verse counts. After fixing
@@ -64,23 +66,39 @@ website counts.
 
 The source lists differ in 34 hymns (after resolving 380). These differences do
 not imply 34 errors: several printed alternatives have no website recording.
-The audit preserves both lists and documents all five reviewed exceptions.
+The audit preserves both lists and documents all four reviewed exceptions.
 
-Changes to chorale sets compared with the original committed application data:
+## Live site versus repository baseline
 
-| Hymn | Before | After | Basis |
-| --- | --- | --- | --- |
-| 239 | 143, 531 | 531 | Both explicit sources identify 531; 143 was an inferred title-alias match |
-| 380 | 439, 311, 63 | 439, 311 | Resolve merged PDF cell against source rows/URL |
-| 432 | 201, 202 | 202 | Litany, not Kyrie; explicit URL and register qualifier |
-| 433 | 201, 202 | 201 | Kyrie, not Litany; explicit URL and register qualifier |
-| 438 | 568 | Nadver C / Sanctus | Liturgical page reference, not chorale 568 |
-| 440 | 570, 416 | Agnus Dei / højmesseordningen | Liturgical page reference; 416 is a different text/tune |
-| 597 | 493, 63, 423 | 493, 63 | Both explicit sources identify 493 and 63; 423 was inferred from an alias |
-| 735 | 396, 364 | 396, 364, 109 | Explicit secondary recording URL omitted by previous title matching |
-| 790 | 156, 158a, 158b | 156 | Website URL/composer and register title agree; PDF points to a different hymn |
+On re-checking `https://hellokim.me/hymns/` on 24 October 2026, its HTML and JSON
+were different from the repository baseline audited above. The live site served
+older-format data without `chorale_options`; for example, Hymn 5 had only 424 and
+Hymn 790 had only 156. The PR is unmerged and has not been deployed by this work.
+The original table's **Before** column meant repository commit `5560bdc`, not the
+live website. No claim is made about which deployment mechanism caused the drift.
 
-The published dataset's verse counts change for 369 (7 → 6) and 380 (11 → 6).
+| Hymn | Live site when re-checked | Repository baseline 5560bdc | Proposed PR | Basis |
+| --- | --- | --- | --- | --- |
+| 239 | 531 | 143, 531 | 531 | Both explicit sources identify 531; 143 was inferred from an alias |
+| 380 | 439 | 439, 311, 63 | 439, 311 | Resolve merged PDF cell against source rows/URL |
+| 432 | 201, 202 | 201, 202 | 202 | Litany; explicit URL and register qualifier |
+| 433 | 201 | 201, 202 | 201 | Kyrie; explicit URL and register qualifier |
+| 438 | 568 | 568 | Book page 568 / Nadver C | Preserve numeric navigation, distinguish page from chorale 568 |
+| 440 | 570 | 570, 416 | Book page 570 plus chorale 416 | Preserve both explicit references, without guessing recording association |
+| 597 | 493 | 493, 63, 423 | 493, 63 | Both explicit sources identify 493 and 63; 423 was inferred from an alias |
+| 735 | 396 | 396, 364 | 396, 364, 109 | Explicit secondary recording URL |
+| 790 | 156 | 156, 158a, 158b | 156, 158a, 158b | Preserve website 156 and printed alternatives 158a/158b |
+
+The initial PR removed 158a/158b for hymn 790 because the website identified 156
+and the register assigned a different title to 158. **That was insufficient
+evidence:** a hymn can use another hymn's melody, and the website need not record
+every printed alternative. That removal has been reversed. The PDF/website
+disagreement remains documented in the generated audit; 158a/158b have no invented
+recording labels. Their absence from the website does not establish a PDF error.
+The same reasoning retains the PDF's explicit chorale 416 for hymn 440. Its
+website recording `x` remains unassigned to 416.
+
+Compared with the repository baseline, verse counts change for 369 (7 → 6) and 380 (11 → 6).
 The raw scraper snapshot also corrects counts that the previous mapping script
 happened to mask. Every source recording label is now stored in full instead of
 truncated UI text. Chorale 568's corrected title benefits hymns 148, 151 and 388.
@@ -100,8 +118,8 @@ placeholders), malformed markup, missing lyrics, scripture numbers, long and
 wrapped melodies, liturgical links, recording-order changes, PDF continuation
 rows, suffix variants, cross-page titles and complete 791-hymn integrity.
 The frontend checks render all 791 option sets, verify Hymn 5, exact numeric
-search, saved preferences, discarded invalid choices and escaped service-order
-references. CI runs the same checks and fails if generated JSON or audit drift.
+search, saved preferences, discarded invalid choices, retained 790 alternatives, numeric book pages and
+escaped service-order references. CI runs the same checks and fails if generated JSON or audit drift.
 
 To refresh all metadata, use `python build_dataset.py --cache-dir .cache/hymns`,
 then `python update_chorales.py`. A failed fetch/parse never writes a partial

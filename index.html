@@ -263,6 +263,7 @@
           noChorales: "Ingen koraler fundet.",
           chorale: "Koral",
           choraleBookNumber: "Koralbog nr.",
+          choraleBookPage: "Koralbog, bind I, side",
           kdsReference: "KDS-reference",
           kdsLongName: "Koralbog til Den Danske Salmebog",
           composerSource: "Komponist / kilde",
@@ -301,6 +302,7 @@
           noChorales: "No chorales found.",
           chorale: "Chorale",
           choraleBookNumber: "Chorale book no.",
+          choraleBookPage: "Chorale book, volume I, page",
           kdsReference: "KDS reference",
           kdsLongName: "Koralbog til Den Danske Salmebog",
           composerSource: "Composer / source",
@@ -514,16 +516,20 @@
         choraleOptions,
         preferredOptionId,
       ) {
+        const bookReferenceHtml = hymn.special_reference
+          ? `<p class="special-reference">${hymn.book_page
+              ? `<strong>${t("choraleBookPage")} ${escapeHtml(hymn.book_page)}</strong><br>`
+              : ""}${escapeHtml(hymn.special_reference)}</p>`
+          : "";
         if (choraleOptions.length === 0) {
-          return hymn.special_reference
-            ? `<p class="special-reference">${escapeHtml(hymn.special_reference)}</p>`
-            : `<p>${t("noChorales")}</p>`;
+          return bookReferenceHtml || `<p>${t("noChorales")}</p>`;
         }
 
         const hymnNumber = escapeHtml(hymn.hymn_number);
 
         return `
           <div class="chorale-options-section">
+            ${bookReferenceHtml}
             <div class="section-title">${t("choraleOptions")}</div>
             <div class="muted section-help">${t("choraleOptionsHelp")}</div>
             <div class="chorale-options">

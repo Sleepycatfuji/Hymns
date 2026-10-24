@@ -79,8 +79,7 @@
       "432",
       "433",
       "438",
-      "440",
-      "790"
+      "440"
     ],
     "reference_extraction_corrections": {
       "380": {
@@ -11614,7 +11613,8 @@
         "reason": "The website uses recording xx (Fra nadverritualet), and the melody PDF says Nadver C. The register’s 568 for Sanctus is a liturgical page reference, not KDS 568 (Ånden opgav enkesønnen). The editorial preface explicitly states these liturgical titles refer to pages in Bind I, 2. del.",
         "url": "https://m.dendanskesalmebogonline.dk/salme/438",
         "special_reference": "Nadver C — Sanctus (Hellig, hellig, hellig er Herren)",
-        "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf"
+        "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf",
+        "book_page": 568
       },
       "options_without_recordings": []
     },
@@ -11646,20 +11646,32 @@
       "reference_kds_codes": [
         "416"
       ],
-      "resolved_kds_codes": [],
-      "mapping_sources": {},
+      "resolved_kds_codes": [
+        "416"
+      ],
+      "mapping_sources": {
+        "416": [
+          "melodihenvisning",
+          "reviewed_correction"
+        ]
+      },
       "website_verse_count": 3,
       "reference_verse_count": 3,
       "resolved_verse_count": 3,
       "verse_count_source": "hymn_table",
       "reviewed_correction": {
-        "kds_codes": [],
-        "reason": "The website identifies the ancient Latin Agnus Dei, using recording x. The register’s 570 is a liturgical page reference, not a chorale code; the editorial preface confirms this. PDF 416 identifies a different hymn (O du Guds Lam uskyldig, for os).",
+        "kds_codes": [
+          "416"
+        ],
+        "reason": "The website uses nonnumeric recording x for Agnus Dei. The register’s 570 is a page reference in Bind I, 2. del, as explained in the editorial preface. Preserve the melody-reference PDF’s explicit KDS 416 alternative; the differing title and missing website recording do not prove that alternative is invalid. Do not associate recording x with 416.",
         "url": "https://m.dendanskesalmebogonline.dk/salme/440",
         "special_reference": "Agnus Dei — højmesseordningen (O Guds Lam uskyldig)",
-        "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf"
+        "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf",
+        "book_page": 570
       },
-      "options_without_recordings": []
+      "options_without_recordings": [
+        "416"
+      ]
     },
     "441": {
       "website_kds_codes": [
@@ -20996,26 +21008,30 @@
         "158b"
       ],
       "resolved_kds_codes": [
-        "156"
+        "156",
+        "158a",
+        "158b"
       ],
       "mapping_sources": {
         "156": [
-          "website_recording_url",
-          "reviewed_correction"
+          "website_recording_url"
+        ],
+        "158a": [
+          "melodihenvisning"
+        ],
+        "158b": [
+          "melodihenvisning"
         ]
       },
       "website_verse_count": 1,
       "reference_verse_count": 1,
       "resolved_verse_count": 1,
       "verse_count_source": "hymn_table",
-      "reviewed_correction": {
-        "kds_codes": [
-          "156"
-        ],
-        "reason": "The website explicitly links /790/156, credits Oluf Ring 1933, and the register gives Gode Gud, din engleskare at 156. PDF 158a/158b instead identify Gud, efter dig jeg længes (the alternative for adjacent hymn 789).",
-        "url": "https://m.dendanskesalmebogonline.dk/salme/790"
-      },
-      "options_without_recordings": []
+      "reviewed_correction": null,
+      "options_without_recordings": [
+        "158a",
+        "158b"
+      ]
     },
     "791": {
       "website_kds_codes": [

@@ -25143,7 +25143,8 @@
     "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/438",
     "chorales": [],
     "chorale_options": [],
-    "special_reference": "Nadver C — Sanctus (Hellig, hellig, hellig er Herren)"
+    "special_reference": "Nadver C — Sanctus (Hellig, hellig, hellig er Herren)",
+    "book_page": 568
   },
   "439": {
     "hymn_number": 439,
@@ -25210,9 +25211,32 @@
     "verse_count": 3,
     "verse_count_source": "hymn_table",
     "hymn_url": "https://m.dendanskesalmebogonline.dk/salme/440",
-    "chorales": [],
-    "chorale_options": [],
-    "special_reference": "Agnus Dei — højmesseordningen (O Guds Lam uskyldig)"
+    "chorales": [
+      {
+        "chorale_number": "416",
+        "chorale_title": "O du Guds Lam uskyldig, for os"
+      }
+    ],
+    "chorale_options": [
+      {
+        "option_id": "kds:416",
+        "kds_codes": [
+          "416"
+        ],
+        "display_kds": "416",
+        "chorale_title": "O du Guds Lam uskyldig, for os",
+        "recording_melody": null,
+        "recording_url": null,
+        "source_melody": null,
+        "recording_match_method": "unassigned",
+        "mapping_sources": [
+          "melodihenvisning",
+          "reviewed_correction"
+        ]
+      }
+    ],
+    "special_reference": "Agnus Dei — højmesseordningen (O Guds Lam uskyldig)",
+    "book_page": 570
   },
   "441": {
     "hymn_number": 441,
@@ -45788,6 +45812,14 @@
       {
         "chorale_number": "156",
         "chorale_title": "Gode Gud, din engleskare"
+      },
+      {
+        "chorale_number": "158a",
+        "chorale_title": "Gud, efter dig jeg længes (a + b)"
+      },
+      {
+        "chorale_number": "158b",
+        "chorale_title": "Gud, efter dig jeg længes (a + b)"
       }
     ],
     "chorale_options": [
@@ -45803,8 +45835,37 @@
         "source_melody": null,
         "recording_match_method": "recording_url",
         "mapping_sources": [
-          "website_recording_url",
-          "reviewed_correction"
+          "website_recording_url"
+        ]
+      },
+      {
+        "option_id": "kds:158a",
+        "kds_codes": [
+          "158a"
+        ],
+        "display_kds": "158a",
+        "chorale_title": "Gud, efter dig jeg længes (a + b)",
+        "recording_melody": null,
+        "recording_url": null,
+        "source_melody": null,
+        "recording_match_method": "unassigned",
+        "mapping_sources": [
+          "melodihenvisning"
+        ]
+      },
+      {
+        "option_id": "kds:158b",
+        "kds_codes": [
+          "158b"
+        ],
+        "display_kds": "158b",
+        "chorale_title": "Gud, efter dig jeg længes (a + b)",
+        "recording_melody": null,
+        "recording_url": null,
+        "source_melody": null,
+        "recording_match_method": "unassigned",
+        "mapping_sources": [
+          "melodihenvisning"
         ]
       }
     ]

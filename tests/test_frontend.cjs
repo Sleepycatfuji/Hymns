@@ -31,6 +31,7 @@ for (const hymn of Object.values(dataset)) {
     assert.ok(rendered.includes(context.escapeHtml(option.chorale_title)));
   }
   if (hymn.special_reference) assert.ok(rendered.includes(context.escapeHtml(hymn.special_reference)));
+  if (hymn.book_page) assert.ok(rendered.includes(`side ${hymn.book_page}</strong>`));
   checked++;
 }
 const five = context.getChoraleOptions(dataset['5']);
@@ -41,6 +42,8 @@ assert.equal(context.hymnMatchesQuery('50', dataset['50'], '5'), false);
 context.setPreferredChorale(5, 'kds:563');
 assert.equal(context.getPreferredChorale(5, five), 'kds:563');
 context.setPreferredChorale(790, 'kds:158a');
-assert.equal(context.getPreferredChorale(790, context.getChoraleOptions(dataset['790'])), null);
+assert.equal(context.getPreferredChorale(790, context.getChoraleOptions(dataset['790'])), 'kds:158a');
+context.setPreferredChorale(433, 'kds:202');
+assert.equal(context.getPreferredChorale(433, context.getChoraleOptions(dataset['433'])), null);
 assert.ok(context.renderChoraleOptionsHtml({special_reference:'<script>'}, [], null).includes('&lt;script&gt;'));
 console.log(`Frontend rendering validated for ${checked} hymns; numeric search and saved preferences passed.`);

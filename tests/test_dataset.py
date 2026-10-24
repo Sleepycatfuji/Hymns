@@ -121,12 +121,16 @@ class DatasetTests(unittest.TestCase):
 
     def test_false_title_matches_and_conflicts(self):
         for n, expected in [(239, ['531']), (380, ['439', '311']), (432, ['202']),
-                            (433, ['201']), (597, ['493', '63']), (790, ['156'])]:
+                            (433, ['201']), (597, ['493', '63']), (790, ['156', '158a', '158b'])]:
             self.assertEqual(self.codes(n), expected)
         self.assertEqual(self.dataset['369']['verse_count'], 6)
         self.assertEqual(self.dataset['380']['verse_count'], 6)
+        self.assertEqual(self.codes(438), [])
+        self.assertEqual(self.codes(440), ['416'])
+        self.assertEqual(self.dataset['438']['book_page'], 568)
+        self.assertEqual(self.dataset['440']['book_page'], 570)
+        self.assertIsNone(self.dataset['440']['chorale_options'][0]['recording_url'])
         for n in [438, 440]:
-            self.assertEqual(self.codes(n), [])
             self.assertTrue(self.dataset[str(n)]['special_reference'])
 
     def test_register_headers_footers_and_page_continuation(self):

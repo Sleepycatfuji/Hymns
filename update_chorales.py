@@ -183,10 +183,6 @@ def update_hymn_dataset(hymns, register, references):
                 recordings = [r for r in hymn['recordings'] if r['kds_code'] == kds_base(code)]
                 if recordings:
                     method = 'recording_base_code'
-            # A reviewed ritual mapping can use its single nonnumeric recording.
-            if not recordings and correction and len(codes) == len(hymn['recordings']) == 1:
-                recordings = hymn['recordings']
-                method = 'reviewed_correction'
             recording = recordings[0] if len(recordings) == 1 else None
             options.append({
                 'option_id': f'kds:{code}', 'kds_codes': [code], 'display_kds': code,
@@ -203,6 +199,8 @@ def update_hymn_dataset(hymns, register, references):
         special = (correction or {}).get('special_reference') or reference.get('special_reference')
         if special:
             updated['special_reference'] = special
+        if correction and correction.get('book_page'):
+            updated['book_page'] = correction['book_page']
         result[hymn_id] = updated
         by_hymn[hymn_id] = {
             'website_kds_codes': web_codes, 'reference_kds_codes': ref_codes,
