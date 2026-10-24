@@ -226,6 +226,7 @@
 
     <script>
       const DATA_PATH = "./data/hymns_dataset_updated.json";
+      const DATA_SHA256 = null; // Set by build_release.py for production bundles.
 
       // New preference storage uses KDS option IDs, not recording labels.
       // Keeping the old key allows an existing saved recording preference to
@@ -263,6 +264,7 @@
           noChorales: "Ingen koraler fundet.",
           chorale: "Koral",
           choraleBookNumber: "Koralbog nr.",
+          choraleBookPage: "Bogside",
           kdsReference: "KDS-reference",
           kdsLongName: "Koralbog til Den Danske Salmebog",
           composerSource: "Komponist / kilde",
@@ -301,6 +303,7 @@
           noChorales: "No chorales found.",
           chorale: "Chorale",
           choraleBookNumber: "Chorale book no.",
+          choraleBookPage: "Book page",
           kdsReference: "KDS reference",
           kdsLongName: "Koralbog til Den Danske Salmebog",
           composerSource: "Composer / source",
@@ -514,8 +517,11 @@
         choraleOptions,
         preferredOptionId,
       ) {
+        const bookReferenceHtml = Number.isInteger(hymn.book_page) && hymn.book_page > 0
+          ? `<p class="special-reference" data-reference-type="book_page" data-page-number="${hymn.book_page}"><strong>${t("choraleBookPage")} ${hymn.book_page}</strong> — ${escapeHtml(hymn.book_page_label)}</p>`
+          : "";
         if (choraleOptions.length === 0) {
-          return `<p>${t("noChorales")}</p>`;
+          return bookReferenceHtml || `<p>${t("noChorales")}</p>`;
         }
 
         const hymnNumber = escapeHtml(hymn.hymn_number);
@@ -544,7 +550,7 @@
                     : "";
 
                   return `
-                    <label class="chorale-option ${selectedClass}">
+                    <label class="chorale-option ${selectedClass}" data-reference-type="chorale" data-chorale-number="${escapeHtml(option.display_kds)}">
                       <input
                         type="radio"
                         name="preferred-kds-${hymnNumber}"
@@ -563,6 +569,7 @@
                 })
                 .join("")}
             </div>
+            ${bookReferenceHtml}
           </div>
         `;
       }
@@ -761,7 +768,13 @@
             throw new Error(`HTTP ${response.status}`);
           }
 
-          hymnData = await response.json();
+          const payload = await response.text();
+          if (DATA_SHA256) {
+            const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+            const actual = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+            if (actual !== DATA_SHA256) throw new Error("Dataset does not match this frontend release");
+          }
+          hymnData = JSON.parse(payload);
 
           status.dataset.state = "loaded";
           status.textContent = t("loaded");
