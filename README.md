@@ -163,6 +163,10 @@ for status, manual retries, credentials, and how to disable publishing.
 
 ## 📱 Usage on Mobile (Android / iPhone)
 
+An offline Android app is available as a Capacitor project in `android/`.
+See [Android builds and Google Play publishing](docs/android.md) for test APKs,
+release bundles, signing and store setup. Android builds do not publish automatically.
+
 Open the app in a browser and add it to the home screen:
 
 ### Android (Chrome)

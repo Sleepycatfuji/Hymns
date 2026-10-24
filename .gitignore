@@ -5,3 +5,8 @@ __pycache__/
 *.pyc
 .cache/
 release/
+node_modules/
+mobile-www/
+*.jks
+*.keystore
+keystore.properties

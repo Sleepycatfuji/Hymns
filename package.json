@@ -1,0 +1,16 @@
+{
+  "name": "danish-hymns",
+  "version": "1.0.0",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
+    "test": "node tests/test_frontend.cjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": { "@capacitor/cli": "8.5.3" }
+}
