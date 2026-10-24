@@ -1,0 +1,6 @@
+{
+  "appId": "me.hellokim.hymns",
+  "appName": "Salme og Koral",
+  "webDir": "mobile-www",
+  "android": { "allowMixedContent": false }
+}

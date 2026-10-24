@@ -1,0 +1,70 @@
+name: Build Android app
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: python -m pip install -r requirements.txt
+      - run: npm ci
+      - name: Validate all hymns and prepare offline assets
+        run: |
+          python -m unittest discover -s tests -v
+          npm test
+          python build_mobile.py
+          npm run android:sync
+      - name: Build test APK and unsigned Play bundle
+        working-directory: android
+        run: ./gradlew assembleDebug bundleRelease lintDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-build-${{ github.sha }}
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/reports/lint-results-debug.html
+          if-no-files-found: error
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Test offline search and saved preferences on Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            cd android && ./gradlew connectedDebugAndroidTest --no-daemon
+            adb pull /sdcard/Android/data/me.hellokim.hymns/files/ android-screenshots
+      - name: Upload Android test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-tests-${{ github.sha }}
+          path: |
+            android/app/build/reports/androidTests/
+            android-screenshots/
+            android/android-screenshots/

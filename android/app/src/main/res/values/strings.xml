@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Salme og Koral</string>
+    <string name="title_activity_main">Salme og Koral</string>
+    <string name="package_name">me.hellokim.hymns</string>
+    <string name="custom_url_scheme">me.hellokim.hymns</string>
+</resources>
