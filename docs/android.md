@@ -58,7 +58,22 @@ that would replace the offline bundle with a remote website.
    Review Google's pre-launch report before requesting production publication.
 
 No signing key, Play credentials, account registration, payment, acceptance of
-terms, upload, or production release is performed by the repository workflow.
+Play terms, upload to Play, or production release is performed by the repository workflow.
+
+## First-time Play Console account
+
+Start at [Play Console signup](https://play.google.com/console/signup) with the
+Google account you want to own the app. Choose Personal for your own hobby project,
+or Organization if publishing for a business or organization. Complete the
+identity/contact verification, review the developer agreement, and pay Google's
+one-time US$25 registration fee yourself. A new personal account also needs
+Android-device verification. See [Google's registration guide](https://support.google.com/googleplay/android-developer/answer/6112435).
+
+New personal accounts currently need a closed test with at least **12 testers
+opted in continuously for 14 days** before applying for production access.
+Internal testing and the CI emulator tests do not replace that requirement.
+Follow [Google's testing requirements](https://support.google.com/googleplay/android-developer/answer/14151465)
+and the requirements displayed in your account; check them again before launch.
 
 ## Updates and storage
 

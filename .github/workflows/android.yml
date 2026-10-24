@@ -38,7 +38,7 @@ jobs:
           npm run android:sync
       - name: Build test APK and unsigned Play bundle
         working-directory: android
-        run: ./gradlew assembleDebug bundleRelease lintDebug --no-daemon
+        run: ./gradlew :app:assembleDebug :app:bundleRelease :app:lintDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: android-build-${{ github.sha }}
@@ -60,7 +60,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            cd android && ./gradlew connectedDebugAndroidTest --no-daemon
+            cd android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
             adb pull /sdcard/Android/data/me.hellokim.hymns/files/ android-screenshots
       - name: Upload Android test reports
         if: always()
