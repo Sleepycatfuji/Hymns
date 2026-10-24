@@ -81,25 +81,54 @@ This app allows users to:
 
 ```
 Hymns/
-├── index.html                  # Frontend app
-├── build_dataset.py            # Scrapes hymn data
-├── update_chorales.py          # Matches hymns → chorales
-├── data/
-│   ├── hymns_dataset.json
-│   ├── hymns_dataset_updated.json
-│   ├── match_audit_report.json
-│   └── reg_kds.pdf
+├── index.html                        # Loads data/hymns_dataset_updated.json
+├── build_dataset.py                  # Structured website metadata scraper
+├── update_chorales.py                # Supported, validated mapping builder
+├── update_chorales_v4.py             # Compatibility entry point to the same builder
+├── tests/                            # Offline HTML, PDF, dataset and frontend tests
+├── docs/dataset-audit.md              # Findings and source-resolution policy
+└── data/
+    ├── hymns_dataset.json             # Website metadata with explicit recording URLs
+    ├── hymns_dataset_updated.json     # Generated application data
+    ├── melody_mapping_audit.json      # Reproducible audit of all 791 hymns
+    ├── reference_corrections.json     # Reviewed source conflicts with evidence
+    ├── source_manifest.json           # Hashes of audited source pages and PDFs
+    ├── reg_kds.pdf
+    └── melodihenvisning.pdf
 ```
 ---
 
 ## ⚙️ How to Run Locally
 
-### 1. Generate dataset
+### 1. Install dependencies and validate the bundled data
+
+Python 3.10+ and Node.js 22+ are supported. A website connection is only needed
+when refreshing source metadata; normal builds and tests use committed inputs.
 
 ```bash
-python3 build_dataset.py
-python3 update_chorales.py
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python update_chorales.py --check
+python -m unittest discover -s tests -v
+node tests/test_frontend.cjs
 ```
+
+To refresh website metadata and regenerate the application data:
+
+```bash
+python build_dataset.py --cache-dir .cache/hymns
+python update_chorales.py
+```
+
+Use a fresh cache directory when a new website snapshot is required. The scraper
+aborts on failed requests or invalid pages, keeping the previous JSON intact.
+Review `data/melody_mapping_audit.json` and any source conflicts before committing.
+The application uses only `data/hymns_dataset_updated.json`; the old 11-hymn root
+sample has been removed. Both mapping script names now run the same builder.
+
+See [the dataset audit](docs/dataset-audit.md) for the mapping and verse-count
+policy, liturgical exceptions, and validation coverage.
 
 ### 2. Start local server
 

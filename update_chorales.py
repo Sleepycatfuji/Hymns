@@ -1,477 +1,283 @@
+"""Build and validate all DDS -> KDS links from explicit source references.
+
+Website recording URLs supplement the printed reference; titles are display
+metadata, never evidence that two hymns use the same tune.
+"""
+from __future__ import annotations
+import argparse
 import json
 import re
-import unicodedata
 from pathlib import Path
-
+from typing import Any
 import pdfplumber
 
+ROOT = Path(__file__).resolve().parent
+CHORALE_REGISTER_PDF = ROOT / 'data/reg_kds.pdf'
+MELODY_REFERENCE_PDF = ROOT / 'data/melodihenvisning.pdf'
+HYMNS_JSON_PATH = ROOT / 'data/hymns_dataset.json'
+OUTPUT_JSON_PATH = ROOT / 'data/hymns_dataset_updated.json'
+AUDIT_JSON_PATH = ROOT / 'data/melody_mapping_audit.json'
+KDS_CODE_RE = re.compile(r'^\d+(?:[ab])?$')
+# The printed row reads "439 / 6311". The website's numbered verse rows
+# and explicit /380/311 recording URL disambiguate it: six verses, KDS 311.
+REFERENCE_OVERRIDES = {
+    '380': {'kds_codes': ['439', '311'], 'verse_count': 6},
+    '438': {'kds_codes': [], 'verse_count': None, 'special_reference': 'Nadver C'},
+}
+# Reviewed conflicts, not title-similarity guesses. Evidence is recorded in
+# data/reference_corrections.json and copied into the generated audit.
+LITURGICAL_PAGE_REFERENCES = {
+    ('568', 'Hellig, hellig, hellig er Herren'),
+    ('570', 'O Guds Lam uskyldig (Agnus Dei)'),
+    ('571', 'O du Guds Lam uskyldig, du, som'),
+}
+CORRECTIONS_PATH = ROOT / 'data/reference_corrections.json'
 
-# ---------------------------------
-# FILE PATHS
-# ---------------------------------
-PDF_PATH = Path("data/reg_kds.pdf")
-HYMNS_JSON_PATH = Path("data/hymns_dataset.json")
-OUTPUT_JSON_PATH = Path("data/hymns_dataset_updated.json")
+
+def clean_text(value):
+    return re.sub(r'\s+', ' ', value or '').strip()
 
 
-# ---------------------------------
-# TEXT HELPERS
-# ---------------------------------
-def clean_text(text: str) -> str:
-    if not text:
-        return ""
-    text = text.replace("\xa0", " ")
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+def unique_in_order(items):
+    return list(dict.fromkeys(items))
 
 
-def strip_parenthetical(text: str) -> str:
+def kds_base(code):
+    return re.sub(r'[ab]$', '', str(code))
+
+
+def parse_chorale_register(pdf_path):
+    # Read columns in order but retain the current entry across column/page
+    # boundaries (KDS 294 continues on page 4). Exclude headers and footers.
+    entries = {}
+    current = None
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            for left, right in [(0, page.width / 2), (page.width / 2, page.width)]:
+                text = page.crop((left, 70, right, page.height - 60)).extract_text() or ''
+                for line in text.splitlines():
+                    line = clean_text(line)
+                    match = re.match(r'^(\d+)\.\s+(.*)$', line)
+                    if match:
+                        current, title = match.groups()
+                        if (current, title) in LITURGICAL_PAGE_REFERENCES:
+                            current = None
+                            continue
+                        if current in entries:
+                            raise ValueError(f'Duplicate register code {current}')
+                        entries[current] = {'chorale_number': current, 'chorale_title': title}
+                    elif line and current:
+                        entries[current]['chorale_title'] += ' ' + line
+    if set(entries) != set(map(str, range(1, 569))):
+        raise ValueError('Incomplete KDS register')
+    return entries
+
+
+def parse_melody_reference_pdf(pdf_path: Path) -> dict[str, dict[str, Any]]:
+    """Parse the four-column table using word coordinates, not text order.
+
+    A plain ``extract_text`` call mixes the four visual columns. The document
+    uses stable x coordinates for DDS, KDS and v, so reading each column by
+    position is much more reliable.
     """
-    Remove things like:
-    (Litaniet), (Nytår), (Vægterversene)
-    """
-    text = clean_text(text)
-    text = re.sub(r"\s*\([^)]*\)", "", text)
-    return clean_text(text)
-
-
-def normalize_text(text: str) -> str:
-    if not text:
-        return ""
-
-    text = text.lower()
-    text = unicodedata.normalize("NFKD", text)
-    text = "".join(c for c in text if not unicodedata.combining(c))
-
-    text = text.replace("a.p.", "ap")
-    text = text.replace("a. p.", "ap")
-    text = text.replace("c. e. f.", "cef")
-    text = text.replace("j. p. e.", "jpe")
-    text = text.replace("h. o. c.", "hoc")
-    text = text.replace("ö", "o")
-    text = text.replace("ä", "a")
-    text = text.replace("ü", "u")
-
-    text = re.sub(r"[^a-z0-9æøå\s]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
-
-# ---------------------------------
-# PDF PARSING
-# ---------------------------------
-def parse_chorale_pdf(pdf_path: Path) -> list[dict]:
-    chorales = []
-    seen = set()
-
-    def parse_text_block(text: str):
-        current_number = None
-        current_title_parts = []
-
-        if not text:
-            return
-
-        lines = text.split("\n")
-
-        for raw_line in lines:
-            line = clean_text(raw_line)
-            if not line:
-                continue
-
-            # New chorale entry
-            match = re.match(r"^(\d+)\.\s+(.*)$", line)
-            if match:
-                # Save previous entry
-                if current_number is not None:
-                    full_title = clean_text(" ".join(current_title_parts))
-                    key = (current_number, full_title)
-                    if full_title and key not in seen:
-                        seen.add(key)
-                        chorales.append(
-                            {
-                                "chorale_number": current_number,
-                                "chorale_title": full_title,
-                            }
-                        )
-
-                current_number = int(match.group(1))
-                current_title_parts = [match.group(2)]
-
-            else:
-                # Continuation line
-                if current_number is not None:
-                    current_title_parts.append(line)
-
-        # Save final entry in block
-        if current_number is not None:
-            full_title = clean_text(" ".join(current_title_parts))
-            key = (current_number, full_title)
-            if full_title and key not in seen:
-                seen.add(key)
-                chorales.append(
-                    {
-                        "chorale_number": current_number,
-                        "chorale_title": full_title,
-                    }
-                )
+    references: dict[str, dict[str, Any]] = {}
+    # x positions of the DDS field in the PDF's four printed columns.
+    column_starts = (56.7, 157.7, 258.7, 359.7)
+    field_spacing = 27.0
 
     with pdfplumber.open(pdf_path) as pdf:
-        for page_num, page in enumerate(pdf.pages, start=1):
-            width = page.width
-            height = page.height
+        for page in pdf.pages:
+            words = page.extract_words(keep_blank_chars=False, use_text_flow=True)
 
-            # Split page into left and right halves
-            left_bbox = (0, 0, width / 2, height)
-            right_bbox = (width / 2, 0, width, height)
+            for start_x in column_starts:
+                column_words = [
+                    word
+                    for word in words
+                    if start_x - 8 <= word["x0"] < start_x + 72
+                    and 60 <= word["top"] <= page.height - 35
+                ]
 
-            left_page = page.crop(left_bbox)
-            right_page = page.crop(right_bbox)
+                rows: list[dict[str, Any]] = []
+                for word in sorted(column_words, key=lambda item: (item["top"], item["x0"])):
+                    if not rows or abs(rows[-1]["top"] - word["top"]) > 2:
+                        rows.append({"top": word["top"], "words": [word]})
+                    else:
+                        rows[-1]["words"].append(word)
 
-            left_text = left_page.extract_text()
-            right_text = right_page.extract_text()
+                current_hymn: str | None = None
 
-            if not left_text and not right_text:
-                print(f"Warning: no text on page {page_num}")
-                continue
+                for row in rows:
+                    cells = ["", "", ""]  # DDS, KDS, verses
+                    for word in row["words"]:
+                        relative_x = word["x0"] - start_x
+                        field_index = min(range(3), key=lambda index: abs(relative_x - index * field_spacing))
+                        if abs(relative_x - field_index * field_spacing) <= 12:
+                            # Some codes are extracted as separate '2' and 'a'
+                            # words; joining them gives the correct KDS code 2a.
+                            cells[field_index] += word["text"]
 
-            parse_text_block(left_text)
-            parse_text_block(right_text)
+                    dds_code, kds_code, verse_count = cells
 
-    return chorales
+                    if dds_code.isdigit() and KDS_CODE_RE.fullmatch(kds_code or ""):
+                        current_hymn = dds_code
+                        record = references.setdefault(
+                            current_hymn,
+                            {"kds_codes": [], "verse_count": None, "special_reference": None},
+                        )
+                        record["kds_codes"].append(kds_code)
+                        if verse_count.isdigit():
+                            record["verse_count"] = int(verse_count)
 
+                    elif not dds_code and KDS_CODE_RE.fullmatch(kds_code or "") and current_hymn:
+                        record = references[current_hymn]
+                        record["kds_codes"].append(kds_code)
+                        # A few rows put the verse count beside the final KDS code.
+                        if verse_count.isdigit() and record["verse_count"] is None:
+                            record["verse_count"] = int(verse_count)
 
-# ---------------------------------
-# MATCHING HELPERS
-# ---------------------------------
-def deduplicate_chorales(chorales: list[dict]) -> list[dict]:
-    seen = set()
-    result = []
+    for record in references.values():
+        record["kds_codes"] = unique_in_order(record["kds_codes"])
 
-    for chorale in chorales:
-        key = chorale["chorale_number"]
-        if key not in seen:
-            seen.add(key)
-            result.append(
-                {
-                    "chorale_number": chorale["chorale_number"],
-                    "chorale_title": chorale["chorale_title"],
-                }
-            )
+    # Correct the small number of PDF text-extraction edge cases explicitly.
+    for hymn_number, override in REFERENCE_OVERRIDES.items():
+        record = references.setdefault(hymn_number, {"kds_codes": [], "verse_count": None, "special_reference": None})
+        record.update(override)
 
-    return result
-
-
-def find_chorale_candidates(search_text: str, chorales: list[dict]) -> list[dict]:
-    """
-    Find chorale entries whose title starts with the given text.
-    """
-    search_norm = normalize_text(search_text)
-    matches = []
-
-    if not search_norm:
-        return matches
-
-    for chorale in chorales:
-        chorale_norm = normalize_text(chorale["chorale_title"])
-
-        if chorale_norm.startswith(search_norm):
-            matches.append(chorale)
-
-    return matches
+    return references
 
 
-def find_candidates_from_melody_titles(melodies: list[str], chorales: list[dict]) -> list[dict]:
-    """
-    Fallback:
-    Some hymns use another hymn/chorale title as their melody, e.g.
-    'Et lidet barn så lysteligt' or 'Kraften fra det høje'.
-    Try matching those melody texts directly against chorale titles.
-    """
-    results = []
+def update_hymn_dataset(hymns, register, references):
+    corrections = json.loads(CORRECTIONS_PATH.read_text(encoding='utf-8'))
+    result, by_hymn = {}, {}
+    for hymn_id, hymn in hymns.items():
+        reference = references[hymn_id]
+        web_codes = [r['kds_code'] for r in hymn['recordings'] if r['kds_code']]
+        ref_codes = reference['kds_codes']
+        codes = []
+        sources = {}
+        for code, source in [(c, 'website_recording_url') for c in web_codes] + [(c, 'melodihenvisning') for c in ref_codes]:
+            # A recording for base 24 applies to the tune, while the printed
+            # reference retains separately selectable arrangements 24a and 24b.
+            variants = [c for c in ref_codes if kds_base(c) == code and c != code]
+            for expanded in variants or [code]:
+                if expanded not in codes:
+                    codes.append(expanded)
+                sources.setdefault(expanded, [])
+                if source not in sources[expanded]:
+                    sources[expanded].append(source)
+        correction = corrections.get(hymn_id)
+        if correction:
+            codes = correction['kds_codes']
+            sources = {c: unique_in_order(sources.get(c, []) + ['reviewed_correction']) for c in codes}
 
-    for melody in melodies:
-        melody = clean_text(melody)
-
-        if not melody:
-            continue
-        if re.match(r"^\d+$", melody):
-            continue
-        if any(ch.isdigit() for ch in melody):
-            # composer/year style melody line, skip for this fallback
-            continue
-
-        candidates = find_chorale_candidates(melody, chorales)
-        results.extend(candidates)
-
-    return deduplicate_chorales(results)
-
-
-def melody_to_keywords(melody: str) -> list[str]:
-    melody_norm = normalize_text(melody)
-
-    possible_keywords = [
-        "lossius",
-        "berggreen",
-        "weyse",
-        "laub",
-        "meidell",
-        "rung",
-        "hartmann",
-        "lindeman",
-        "ring",
-        "kalhauge",
-        "winding",
-        "grundtvig",
-        "schumann",
-        "klug",
-        "cruger",
-        "nielsen",
-        "schop",
-        "freylinghausen",
-        "konig",
-        "gebauer",
-        "nutzhorn",
-        "barnekow",
-        "tysk",
-        "svensk",
-        "norsk",
-        "dansk",
-        "faroesk",
-        "færøsk",
-    ]
-
-    found = [kw for kw in possible_keywords if kw in melody_norm]
-    return list(set(found))
-
-
-def filter_candidates_by_melody(candidates: list[dict], melodies: list[str]) -> list[dict]:
-    """
-    If multiple chorale candidates share the same hymn text,
-    use melody keywords to narrow them down.
-    """
-    if not candidates:
-        return []
-
-    all_keywords = []
-    for melody in melodies:
-        all_keywords.extend(melody_to_keywords(melody))
-
-    all_keywords = list(set(all_keywords))
-
-    if not all_keywords:
-        return candidates
-
-    filtered = []
-    for candidate in candidates:
-        title_norm = normalize_text(candidate["chorale_title"])
-        if any(keyword in title_norm for keyword in all_keywords):
-            filtered.append(candidate)
-
-    # If melody filtering finds nothing, keep the original candidates
-    return filtered if filtered else candidates
-
-
-def find_chorale_matches_by_title(query_title: str, chorales: list[dict]) -> list[dict]:
-    """
-    Find chorales by title using normalized exact / startswith / contains matching.
-    """
-    query_norm = normalize_text(query_title)
-    if not query_norm:
-        return []
-
-    exact_matches = []
-    startswith_matches = []
-    contains_matches = []
-
-    for chorale in chorales:
-        chorale_title = chorale.get("chorale_title", "")
-        chorale_norm = normalize_text(chorale_title)
-
-        if chorale_norm == query_norm:
-            exact_matches.append(chorale)
-        elif chorale_norm.startswith(query_norm):
-            startswith_matches.append(chorale)
-        elif query_norm in chorale_norm:
-            contains_matches.append(chorale)
-
-    if exact_matches:
-        return exact_matches
-    if startswith_matches:
-        return startswith_matches
-    return contains_matches
-
-
-def resolve_manual_override_entries(entries: list, chorales: list[dict]) -> list[dict]:
-    """
-    Resolve a mixed override list into chorale dicts.
-    Entries may already be chorale dicts, or title strings.
-    """
-    resolved = []
-
-    for entry in entries:
-        if isinstance(entry, dict):
-            resolved.append(entry)
-        elif isinstance(entry, str):
-            resolved.extend(find_chorale_matches_by_title(entry, chorales))
-
-    return deduplicate_chorales(resolved)
-
-
-# ---------------------------------
-# MANUAL OVERRIDES
-# ---------------------------------
-MANUAL_CHORALE_OVERRIDES = {
-    "569": {
-        "replace": [
-            {
-                "chorale_number": 255,
-                "chorale_title": "Ja, engang mine øjne skal"
-            }
-        ]
-    },
-    "309": {
-        "append": [
-            {
-                "chorale_number": 33,
-                "chorale_title": "Bøj, o Helligånd, os alle"
-            }
-        ]
-    },
-    "240": {
-        "replace": [
-            {
-                "chorale_number": 83,
-                "chorale_title": "Dig være ære"
-            }
-        ]
-    },
-    "520": {
-        "replace": [
-            {
-                "chorale_number": 106,
-                "chorale_title": "Du, som vejen er og livet"
-            }
-        ]
-    },
-    "565": {
-        "replace_by_title": [
-            "Med sorgen og klagen hold måde"
-        ]
-    },
-    "750": {
-        "replace": [
-            {
-                "chorale_number": 400,
-                "chorale_title": "Nu titte til hinanden"
-            }
-        ]
-    },
-    "757": {
-        "replace_by_title": [
-            "Den lyse dag forgangen er"
-        ]
+        count = hymn['verse_count']
+        count_source = hymn['verse_count_source']
+        if count is None:
+            count, count_source = reference['verse_count'], 'melodihenvisning'
+        options = []
+        for code in codes:
+            title = register[kds_base(code)]['chorale_title']
+            recordings = [r for r in hymn['recordings'] if r['kds_code'] == code]
+            method = 'recording_url' if recordings else 'unassigned'
+            if not recordings and code != kds_base(code):
+                recordings = [r for r in hymn['recordings'] if r['kds_code'] == kds_base(code)]
+                if recordings:
+                    method = 'recording_base_code'
+            # A reviewed ritual mapping can use its single nonnumeric recording.
+            if not recordings and correction and len(codes) == len(hymn['recordings']) == 1:
+                recordings = hymn['recordings']
+                method = 'reviewed_correction'
+            recording = recordings[0] if len(recordings) == 1 else None
+            options.append({
+                'option_id': f'kds:{code}', 'kds_codes': [code], 'display_kds': code,
+                'chorale_title': title,
+                'recording_melody': recording['label'] if recording else None,
+                'recording_url': recording['url'] if recording else None,
+                'source_melody': None,  # Free-text melody labels have no positional association.
+                'recording_match_method': method if recording else 'unassigned',
+                'mapping_sources': sources[code],
+            })
+        updated = {**hymn, 'verse_count': count, 'verse_count_source': count_source,
+                   'chorales': [{'chorale_number': o['display_kds'], 'chorale_title': o['chorale_title']} for o in options],
+                   'chorale_options': options}
+        special = (correction or {}).get('special_reference') or reference.get('special_reference')
+        if special:
+            updated['special_reference'] = special
+        result[hymn_id] = updated
+        by_hymn[hymn_id] = {
+            'website_kds_codes': web_codes, 'reference_kds_codes': ref_codes,
+            'resolved_kds_codes': codes, 'mapping_sources': sources,
+            'website_verse_count': hymn['verse_count'], 'reference_verse_count': reference['verse_count'],
+            'resolved_verse_count': count, 'verse_count_source': count_source,
+            'reviewed_correction': correction,
+            'options_without_recordings': [o['display_kds'] for o in options if not o['recording_url']],
+        }
+    summary = {
+        'hymns_audited': len(result), 'register_entries': len(register),
+        'reference_entries': len(references),
+        'liturgical_page_references_excluded': [list(item) for item in sorted(LITURGICAL_PAGE_REFERENCES)],
+        'verse_counts_from_pdf': [i for i, h in result.items() if h['verse_count_source'] == 'melodihenvisning'],
+        'verse_count_conflicts': [i for i, h in by_hymn.items() if h['website_verse_count'] is not None and h['reference_verse_count'] is not None and h['website_verse_count'] != h['reference_verse_count']],
+        'mapping_source_differences': [i for i, h in by_hymn.items() if {kds_base(c) for c in h['website_kds_codes']} != {kds_base(c) for c in h['reference_kds_codes']}],
+        'reviewed_corrections': list(corrections),
+        'reference_extraction_corrections': REFERENCE_OVERRIDES,
     }
-}
-# ---------------------------------
-# MAIN UPDATE FUNCTION
-# ---------------------------------
-def update_hymn_dataset(hymns_dataset: dict, chorales: list[dict]) -> dict:
-    updated = {}
-
-    # First pass: normal matching
-    for hymn_id, hymn in hymns_dataset.items():
-        hymn_title = clean_text(hymn.get("hymn_title", ""))
-        first_line = clean_text(hymn.get("first_line", ""))
-        melodies = hymn.get("melodies", [])
-
-        match_text = first_line if first_line else hymn_title
-
-        # First attempt
-        candidates = find_chorale_candidates(match_text, chorales)
-
-        # Second attempt (strip parentheses)
-        if not candidates:
-            simplified_text = strip_parenthetical(match_text)
-            if simplified_text != match_text:
-                candidates = find_chorale_candidates(simplified_text, chorales)
-
-        final_matches = filter_candidates_by_melody(candidates, melodies)
-        final_matches = deduplicate_chorales(final_matches)
-
-        # Also add chorales that match melody titles
-        melody_title_matches = find_candidates_from_melody_titles(melodies, chorales)
-
-        if melody_title_matches:
-            final_matches = deduplicate_chorales(final_matches + melody_title_matches)
-
-        updated_hymn = dict(hymn)
-        updated_hymn["chorales"] = deduplicate_chorales(final_matches)
-        updated[hymn_id] = updated_hymn
-
-    # Second pass: manual overrides
-    for hymn_id, override_config in MANUAL_CHORALE_OVERRIDES.items():
-        if hymn_id not in updated:
-            continue
-
-        if "replace" in override_config:
-            updated[hymn_id]["chorales"] = deduplicate_chorales(override_config["replace"])
-
-        if "append" in override_config:
-            existing = updated[hymn_id].get("chorales") or []
-            combined = existing + override_config["append"]
-            updated[hymn_id]["chorales"] = deduplicate_chorales(combined)
-
-        if "replace_by_title" in override_config:
-            resolved = resolve_manual_override_entries(override_config["replace_by_title"], chorales)
-            if resolved:
-                updated[hymn_id]["chorales"] = resolved
-
-        if "append_by_title" in override_config:
-            resolved = resolve_manual_override_entries(override_config["append_by_title"], chorales)
-            existing = updated[hymn_id].get("chorales") or []
-            updated[hymn_id]["chorales"] = deduplicate_chorales(existing + resolved)
-
-    # Final reporting
-    no_match_count = 0
-    for _, hymn in updated.items():
-        if not hymn.get("chorales"):
-            no_match_count += 1
-            print(
-                f"NO MATCH -> hymn {hymn.get('hymn_number')}: "
-                f"{hymn.get('first_line') or hymn.get('hymn_title')}"
-            )
-            print(f"  melodies: {hymn.get('melodies', [])}")
-
-    print(f"\nFinished. Hymns with no chorale match: {no_match_count}")
-    return updated
+    return result, {'summary': summary, 'by_hymn': by_hymn}
 
 
-# ---------------------------------
-# RUN
-# ---------------------------------
+def validate_dataset(dataset, register, references):
+    expected = set(map(str, range(1, 792)))
+    if set(dataset) != expected or set(references) != expected:
+        raise ValueError('Expected every hymn from 1 through 791')
+    for key, hymn in dataset.items():
+        if hymn['hymn_number'] != int(key) or not hymn['hymn_title']:
+            raise ValueError(f'{key}: invalid identity')
+        if type(hymn['verse_count']) is not int or hymn['verse_count'] <= 0:
+            raise ValueError(f'{key}: invalid verse count')
+        options = hymn['chorale_options']
+        codes = [o['display_kds'] for o in options]
+        if (not codes and not hymn.get('special_reference')) or len(codes) != len(set(codes)):
+            raise ValueError(f'{key}: missing/duplicate chorales')
+        for o in options:
+            code = o['display_kds']
+            if not KDS_CODE_RE.fullmatch(code) or kds_base(code) not in register:
+                raise ValueError(f'{key}: invalid chorale {code}')
+            if o['option_id'] != f'kds:{code}' or o['kds_codes'] != [code] or not o['mapping_sources']:
+                raise ValueError(f'{key}: inconsistent option {code}')
+            if o['recording_url']:
+                matches = [r for r in hymn['recordings'] if r['url'] == o['recording_url'] and r['label'] == o['recording_melody']]
+                if len(matches) != 1:
+                    raise ValueError(f'{key}: unsupported recording label')
+                source_code = matches[0]['kds_code']
+                if o['recording_match_method'] != 'reviewed_correction' and source_code not in {code, kds_base(code)}:
+                    raise ValueError(f'{key}: recording points to another chorale')
+        if hymn['chorales'] != [{'chorale_number': o['display_kds'], 'chorale_title': o['chorale_title']} for o in options]:
+            raise ValueError(f'{key}: flat/structured options diverge')
+
+
+def generate():
+    register = parse_chorale_register(CHORALE_REGISTER_PDF)
+    references = parse_melody_reference_pdf(MELODY_REFERENCE_PDF)
+    hymns = json.loads(HYMNS_JSON_PATH.read_text(encoding='utf-8'))
+    dataset, audit = update_hymn_dataset(hymns, register, references)
+    validate_dataset(dataset, register, references)
+    return dataset, audit
+
+
 def main():
-    if not PDF_PATH.exists():
-        raise FileNotFoundError(f"PDF not found: {PDF_PATH}")
-
-    if not HYMNS_JSON_PATH.exists():
-        raise FileNotFoundError(f"Hymns JSON not found: {HYMNS_JSON_PATH}")
-
-    print("Parsing chorale PDF...")
-    chorales = parse_chorale_pdf(PDF_PATH)
-    print(f"Parsed {len(chorales)} chorale entries")
-
-    print("Loading hymn dataset...")
-    with open(HYMNS_JSON_PATH, "r", encoding="utf-8") as f:
-        hymns_dataset = json.load(f)
-
-    print("Updating hymn dataset...")
-    updated_dataset = update_hymn_dataset(hymns_dataset, chorales)
-
-    with open(OUTPUT_JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(updated_dataset, f, ensure_ascii=False, indent=2)
-
-    print(f"Saved updated dataset to: {OUTPUT_JSON_PATH}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true', help='Verify committed outputs without modifying files')
+    args = parser.parse_args()
+    dataset, audit = generate()
+    for path, content in [(OUTPUT_JSON_PATH, dataset), (AUDIT_JSON_PATH, audit)]:
+        text = json.dumps(content, ensure_ascii=False, indent=2) + '\n'
+        if args.check:
+            if not path.exists() or path.read_text(encoding='utf-8') != text:
+                raise SystemExit(f'Stale generated file: {path}. Run python update_chorales.py')
+        else:
+            path.write_text(text, encoding='utf-8')
+    print(f'Validated {len(dataset)} hymns; ' + ('committed outputs match.' if args.check else 'outputs regenerated.'))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

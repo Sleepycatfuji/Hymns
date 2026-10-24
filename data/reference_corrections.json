@@ -1,0 +1,37 @@
+{
+  "432": {
+    "kds_codes": [
+      "202"
+    ],
+    "reason": "The website identifies the Litany (Litaniet), explicitly links /432/202 and credits Laub 1922. The register distinguishes 202 (Litani) from 201 (Kyrie); the PDF conflates both liturgical forms.",
+    "url": "https://m.dendanskesalmebogonline.dk/salme/432"
+  },
+  "433": {
+    "kds_codes": [
+      "201"
+    ],
+    "reason": "The website identifies the Kyrie and explicitly links /433/201. Register 201 is Kyrie; 202 is Litani. The PDF conflates both liturgical forms.",
+    "url": "https://m.dendanskesalmebogonline.dk/salme/433"
+  },
+  "438": {
+    "kds_codes": [],
+    "reason": "The website uses recording xx (Fra nadverritualet), and the melody PDF says Nadver C. The register’s 568 for Sanctus is a liturgical page reference, not KDS 568 (Ånden opgav enkesønnen). The editorial preface explicitly states these liturgical titles refer to pages in Bind I, 2. del.",
+    "url": "https://m.dendanskesalmebogonline.dk/salme/438",
+    "special_reference": "Nadver C — Sanctus (Hellig, hellig, hellig er Herren)",
+    "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf"
+  },
+  "440": {
+    "kds_codes": [],
+    "reason": "The website identifies the ancient Latin Agnus Dei, using recording x. The register’s 570 is a liturgical page reference, not a chorale code; the editorial preface confirms this. PDF 416 identifies a different hymn (O du Guds Lam uskyldig, for os).",
+    "url": "https://m.dendanskesalmebogonline.dk/salme/440",
+    "special_reference": "Agnus Dei — højmesseordningen (O Guds Lam uskyldig)",
+    "evidence_url": "https://www.thor-callesen.com/koralbog/pdf/forord_brinth.pdf"
+  },
+  "790": {
+    "kds_codes": [
+      "156"
+    ],
+    "reason": "The website explicitly links /790/156, credits Oluf Ring 1933, and the register gives Gode Gud, din engleskare at 156. PDF 158a/158b instead identify Gud, efter dig jeg længes (the alternative for adjacent hymn 789).",
+    "url": "https://m.dendanskesalmebogonline.dk/salme/790"
+  }
+}

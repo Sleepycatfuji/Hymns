@@ -515,7 +515,9 @@
         preferredOptionId,
       ) {
         if (choraleOptions.length === 0) {
-          return `<p>${t("noChorales")}</p>`;
+          return hymn.special_reference
+            ? `<p class="special-reference">${escapeHtml(hymn.special_reference)}</p>`
+            : `<p>${t("noChorales")}</p>`;
         }
 
         const hymnNumber = escapeHtml(hymn.hymn_number);
